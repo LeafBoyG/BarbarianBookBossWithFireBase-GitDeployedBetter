@@ -27,52 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderPerks() { if (!userData) return; const containers = { strength: strengthPerksContainer, intellect: intellectPerksContainer, wisdom: wisdomPerksContainer, charisma: charismaPerksContainer }; for (const attrKey in PERKS_LIST) { const container = containers[attrKey]; container.innerHTML = ''; const attrPerks = PERKS_LIST[attrKey]; for (const level in attrPerks) { attrPerks[level].forEach(perk => { const isUnlocked = userData.unlockedPerks.includes(perk.id); const canAfford = (userData.perkPoints || 0) > 0; const meetsLevel = userData.attributes[attrKey].level >= perk.requiredLevel; let stateClass = 'locked'; if (isUnlocked) { stateClass = 'unlocked'; } else if (canAfford && meetsLevel) { stateClass = 'available'; } const perkCard = document.createElement('div'); perkCard.classList.add('perk-card', stateClass); perkCard.dataset.perkId = perk.id; perkCard.dataset.attribute = attrKey; perkCard.dataset.level = level; perkCard.innerHTML = `<div class="perk-name">${perk.name}</div><div class="perk-description">${perk.description}</div><div class="perk-requirement">Requires ${attrKey.toUpperCase()} Level ${perk.requiredLevel}</div> ${isUnlocked ? '<div class="perk-unlocked-text">UNLOCKED</div>' : ''} `; container.appendChild(perkCard); }); } } }
     function calculateStats() { const stats = { totalBooks: 0, totalPages: 0, mightiestBook: 'None Conquered', mightiestBookPages: 0, favGenre: 'N/A' }; const completed = userData.completedQuests; if (!completed || completed.length === 0) return stats; stats.totalBooks = completed.length; const genreCounts = {}; let maxPages = 0; completed.forEach(quest => { stats.totalPages += quest.totalPages; if (quest.totalPages > maxPages) { maxPages = quest.totalPages; stats.mightiestBook = quest.title; stats.mightiestBookPages = quest.totalPages; } if (quest.genre) { const genre = quest.genre.toLowerCase(); genreCounts[genre] = (genreCounts[genre] || 0) + 1; } }); if (Object.keys(genreCounts).length > 0) { stats.favGenre = Object.keys(genreCounts).reduce((a, b) => genreCounts[a] > genreCounts[b] ? a : b); } return stats; }
     function renderUI() { if (!currentUser) return; const overallLevel = getOverallLevel(); playerLevelSpan.textContent = overallLevel; let totalXpPercentage = 0; let attributeCount = 0; for (const attrKey in userData.attributes) { const attr = userData.attributes[attrKey]; totalXpPercentage += (attr.xp / getXpForNextLevel(attr.level)) * 100; attributeCount++; } xpBarFill.style.width = `${totalXpPercentage / attributeCount}%`; if (userData.activeQuest) { activeQuestDisplay.classList.remove('hidden'); document.getElementById('quest-creator-section').classList.add('hidden'); renderActiveQuest(); } else { activeQuestDisplay.classList.add('hidden'); document.getElementById('quest-creator-section').classList.remove('hidden'); handleHideNewQuestForm(false); } renderCompletedQuests(); }
-   function renderPerks() {
-    if (!userData) return;
-    const containers = {
-        strength: strengthPerksContainer,
-        intellect: intellectPerksContainer,
-        wisdom: wisdomPerksContainer,
-        charisma: charismaPerksContainer
-    };
-
-    for (const attrKey in PERKS_LIST) {
-        const container = containers[attrKey];
-        if (!container) continue;
-        container.innerHTML = '';
-        const attrPerks = PERKS_LIST[attrKey];
-
-        for (const level in attrPerks) { // 'level' is the key, e.g., "5", "10"
-            attrPerks[level].forEach(perk => {
-                const isUnlocked = userData.unlockedPerks.includes(perk.id);
-                const canAfford = (userData.perkPoints || 0) > 0;
-                const meetsLevel = userData.attributes[attrKey].level >= perk.requiredLevel;
-                
-                let stateClass = 'locked';
-                if (isUnlocked) {
-                    stateClass = 'unlocked';
-                } else if (canAfford && meetsLevel) {
-                    stateClass = 'available';
-                }
-
-                const perkCard = document.createElement('div');
-                perkCard.classList.add('perk-card', stateClass);
-                perkCard.dataset.perkId = perk.id;
-                perkCard.dataset.attribute = attrKey;
-                perkCard.dataset.level = level;
-
-                // THE FIX IS HERE: We now use 'level' from the loop, not 'perk.requiredLevel'
-                perkCard.innerHTML = `
-                    <div class="perk-name">${perk.name}</div>
-                    <div class="perk-description">${perk.description}</div>
-                    <div class="perk-requirement">Requires ${attrKey.toUpperCase()} Level ${level}</div>
-                    ${isUnlocked ? '<div class="perk-unlocked-text">UNLOCKED</div>' : ''}
-                `;
-                container.appendChild(perkCard);
-            });
-        }
-    }
-}
+    function renderActiveQuest() { const quest = userData.activeQuest; if (!quest) return; activeBookTitle.textContent = quest.title; activeBookAuthor.textContent = quest.author ? `by ${quest.author}` : ''; const progressPercentage = Math.min((quest.currentPage / quest.totalPages) * 100, 100); questProgressBar.style.width = `${progressPercentage}%`; questProgressText.textContent = `${quest.currentPage} / ${quest.totalPages} pages`; }
     function renderCompletedQuests() { completedBooksList.innerHTML = ''; if (!userData.completedQuests || userData.completedQuests.length === 0) { completedBooksList.innerHTML = '<li>The Hall is empty. Go conquer some books!</li>'; return; } [...userData.completedQuests].reverse().forEach(quest => { const li = document.createElement('li'); li.innerHTML = `<span>${quest.title}</span> - Conquered on ${quest.dateConquered}<button class="undo-btn" data-id="${quest.id}" aria-label="Undo Conquest" title="Undo Conquest">↶</button>`; completedBooksList.appendChild(li); }); }
     function initializeEventListeners() {
         readingLogNav.addEventListener('click', () => switchView('log')); statsNav.addEventListener('click', () => switchView('stats')); journeyNav.addEventListener('click', () => switchView('journey')); attributesNav.addEventListener('click', () => switchView('attributes')); featsNav.addEventListener('click', () => switchView('feats')); bountiesNav.addEventListener('click', () => switchView('bounties')); clansNav.addEventListener('click', () => switchView('clans')); perksSection.addEventListener('click', handleUnlockPerk); timelineFilters.addEventListener('click', (event) => { if (event.target.classList.contains('filter-btn')) { playSound(soundClick); const buttons = timelineFilters.querySelectorAll('.filter-btn'); buttons.forEach(btn => btn.classList.remove('active')); event.target.classList.add('active'); currentJourneyFilter = event.target.dataset.filter; renderJourneyPage(); } }); bountiesGrid.addEventListener('click', handleAcceptBounty); const clickable = [addBookBtn, logPagesBtn, conquerBookBtn, surrenderQuestBtn, authBtn, loginBtn, signupBtn]; clickable.forEach(btn => btn.addEventListener('click', () => playSound(soundClick))); startNewQuestBtn.addEventListener('click', handleShowNewQuestForm); cancelAddBookBtn.addEventListener('click', () => handleHideNewQuestForm(true)); addBookBtn.addEventListener('click', handleAcceptQuest); logPagesBtn.addEventListener('click', handleLogPages); conquerBookBtn.addEventListener('click', handleConquerQuest); surrenderQuestBtn.addEventListener('click', handleSurrenderQuest); createClanBtn.addEventListener('click', handleCreateClan); leaveClanBtn.addEventListener('click', handleLeaveClan); clanList.addEventListener('click', handleJoinClan); completedBooksList.addEventListener('click', (event) => { if (event.target.classList.contains('undo-btn')) { playSound(soundClick); const questId = event.target.getAttribute('data-id'); handleUndoConquest(questId); } }); authBtn.addEventListener('click', handleAuthButtonClick); loginBtn.addEventListener('click', handleLogin); signupBtn.addEventListener('click', handleSignup); cancelAuthBtn.addEventListener('click', () => { authForm.classList.add('hidden'); clearAuthError(); }); bookGenreSelect.addEventListener('change', () => { if (bookGenreSelect.value === 'custom') { customGenreInput.classList.remove('hidden'); } else { customGenreInput.classList.add('hidden'); } }); editBookGenreSelect.addEventListener('change', () => { if (editBookGenreSelect.value === 'custom') { editCustomGenreInput.classList.remove('hidden'); } else { editCustomGenreInput.classList.add('hidden'); } }); editQuestBtn.addEventListener('click', openEditModal); saveQuestChangesBtn.addEventListener('click', handleSaveChanges); cancelEditQuestBtn.addEventListener('click', closeEditModal);
