@@ -1,15 +1,19 @@
-const CACHE_NAME = 'barbarian-book-boss-v1';
+const CACHE_NAME = 'barbarian-book-boss-v2'; // Updated version
+const GITHUB_REPO_NAME = '/BarbarianBookBossWithFireBase-GitDeployedBetter'; 
+
 // List of files that are essential for the app to work offline
 const URLS_TO_CACHE = [
-    '/',
-    'index.html',
-    'style.css',
-    'script.js',
-    'manifest.json',
-    'assets/Barbs/NormalBarb.webp',
-    'assets/Barbs/AngryBarb.webp',
-    'assets/Barbs/CelebratingBarb.webp'
+    `${BarbarianBookBossWithFireBase-GitDeployedBetter}/`,
+    `${BarbarianBookBossWithFireBase-GitDeployedBetter}/index.html`,
+    `${BarbarianBookBossWithFireBase-GitDeployedBetter}/style.css`,
+    `${BarbarianBookBossWithFireBase-GitDeployedBetter}/script.js`,
+    `${BarbarianBookBossWithFireBase-GitDeployedBetter}/manifest.json`,
+    `${BarbarianBookBossWithFireBase-GitDeployedBetter}/assets/Barbs/NormalBarb.webp`,
+    `${BarbarianBookBossWithFireBase-GitDeployedBetter}/assets/Barbs/AngryBarb.webp`,
+    `${BarbarianBookBossWithFireBase-GitDeployedBetter}/assets/Barbs/CelebratingBarb.webp`
 ];
+
+
 
 // Install event: open a cache and add the core files
 self.addEventListener('install', event => {

@@ -2,7 +2,7 @@
   "name": "Barbarian Book Boss",
   "short_name": "Book Boss",
   "description": "Your gruff mentor for literary conquests!",
-  "start_url": ".",
+  "start_url": "/BarbarianBookBosswitItDeployedBetter/",
   "display": "standalone",
   "background_color": "#17110c",
   "theme_color": "#2c241f",
