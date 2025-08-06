@@ -2,7 +2,7 @@
   "name": "Barbarian Book Boss",
   "short_name": "Book Boss",
   "description": "Your gruff mentor for literary conquests!",
-  "start_url": "/BarbarianBookBosswitItDeployedBetter/",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#17110c",
   "theme_color": "#2c241f",
@@ -18,12 +18,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    },
-    {
-      "src": "assets/icons/icon-monochrome-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "monochrome"
     }
   ]
 }
