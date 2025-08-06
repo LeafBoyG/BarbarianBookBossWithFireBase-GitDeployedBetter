@@ -15,21 +15,34 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 <script>
-                   const firebaseConfig = {
+  // These variables will hold your Firebase services.
+  // Declaring them here makes them accessible to your other scripts.
+  let auth;
+  let db;
+
+  // Your web app's Firebase configuration
+  // This object should contain your actual API keys from the Firebase Console.
+  const firebaseConfig = {
           apiKey: "AIzaSyBwCwos_xdDv-9YDYUsPB-bFqB5YdOwJ2M",
   authDomain: "barbarian-book-club.firebaseapp.com",
   projectId: "barbarian-book-club",
   storageBucket: "barbarian-book-club.firebasestorage.app",
   messagingSenderId: "738320334350",
   appId: "1:738320334350:web:330df7258ca2ccded3065f"
-};
+  }
   // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-</script>
+  const app = firebase.initializeApp(firebaseConfig);
 
+  // Initialize and assign the services to the variables
+  auth = firebase.auth();
+  db = firebase.firestore();
+
+  // You can add this log to confirm in the console that Firebase has started.
+  console.log("Firebase initialized successfully!");
+
+</script>
 
 
       
@@ -235,17 +248,19 @@
     </div>
 
     <div id="authForm" class="auth-form-overlay hidden">
-        <div class="auth-form-content">
+    <div class="auth-form-content">
+        <form id="authenticationForm">
             <h3>TRAIN HARDER, WARRIOR!</h3>
             <input type="email" id="authEmail" placeholder="EMAIL" required>
             <input type="text" id="authUsername" placeholder="USERNAME (OPTIONAL)">
             <input type="password" id="authPassword" placeholder="PASSWORD" required>
             <div id="authErrorMessage" class="auth-error-message"></div>
-            <button id="loginBtn" class="auth-button">LOG IN</button>
-            <button id="signupBtn" class="auth-button">SIGN UP</button>
-            <button id="cancelAuthBtn" class="auth-button cancel-button">CANCEL</button>
-        </div>
+            <button id="loginBtn" type="submit" class="auth-button">LOG IN</button>
+            <button id="signupBtn" type="submit" class="auth-button">SIGN UP</button>
+            <button id="cancelAuthBtn" type="button" class="auth-button cancel-button">CANCEL</button>
+        </form>
     </div>
+</div>
 
     <div id="editQuestModal" class="auth-form-overlay hidden">
         <div class="auth-form-content">
