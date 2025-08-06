@@ -15,7 +15,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
+<link rel="manifest" href="manifest.json">
 <script>
   // These variables will hold your Firebase services.
   // Declaring them here makes them accessible to your other scripts.
@@ -301,5 +301,19 @@
     <audio id="soundQuestComplete" src="assets/sounds/quest-complete.mp3" preload="auto"></audio>
     <audio id="soundQuestStart" src="assets/sounds/quest-start.mp3" preload="auto"></audio>
     <audio id="soundError" src="assets/sounds/error.mp3" preload="auto"></audio>
+<script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+
 </body>
 </html>
