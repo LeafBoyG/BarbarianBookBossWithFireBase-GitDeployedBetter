@@ -1,5 +1,34 @@
 document.addEventListener('DOMContentLoaded', () => {
     'use strict';
+// --- BARB_ISMS & STATE ---
+const BARB_ISMS = {
+  "Grizzled Veteran": {
+    welcome: [
+      "Hmph. Another twig-arm. Ready for words or just to be food for worms?"
+    ],
+    book_completed: ["You crushed that book! Next!"],
+    general_encouragement: ["Good. Keep at it. Don't let your mind get soft."],
+    charmed_encouragement: [
+      "Your progress is... acceptable. Continue.",
+      "Hmph. Not bad. For a book-worm."
+    ],
+    saving_data: ["Recording your deeds..."],
+    quest_accepted: ["A new challenge! Do not fail me, whelp."],
+    quest_surrendered: ["You flee?! Cowards have no place in my war-band!"],
+    quest_undone: ["Hah! The tome returns from the grave!"],
+    error_undo: ["Finish your current battle before starting another!"],
+    error_page_count: ["YOU CANNOT READ MORE PAGES THAN EXIST, FOOL!"],
+    error: ["Fool! Not like that!"],
+    auth_errors: {
+      "auth/invalid-email": "EMAIL BAD! NOT A REAL EMAIL, FOOL!",
+      "auth/user-not-found": "NO WARRIOR WITH THAT EMAIL! SIGN UP, MAYBE?",
+      "auth/wrong-password": "PASSWORD WRONG! TRY AGAIN, OR BRAIN SMASH!",
+      "auth/email-already-in-use": "EMAIL TAKEN! ANOTHER WARRIOR GOT IT! USE ANOTHER!",
+      "auth/weak-password": "PASSWORD WEAK! NEED 6+ CHARACTERS! BE STRONGER!",
+      "default": "AUTH FAILED!"
+    }
+  }
+};
 
     // --- CONSTANTS ---
     const BARB_IMAGE_PATH = 'assets/Barbs/';
@@ -16,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainView = document.querySelector('.game-ui-layout'); const statsView = document.getElementById('statsPage'); const journeyView = document.getElementById('journeyPage'); const attributesView = document.getElementById('attributesPage'); const featsView = document.getElementById('featsPage'); const bountiesView = document.getElementById('bountiesPage'); const clansView = document.getElementById('clansPage'); const readingLogNav = document.getElementById('readingLogNav'); const attributesNav = document.getElementById('attributesNav'); const featsNav = document.getElementById('featsNav'); const statsNav = document.getElementById('statsNav'); const journeyNav = document.getElementById('journeyNav'); const bountiesNav = document.getElementById('bountiesNav'); const clansNav = document.getElementById('clansNav'); const noClanView = document.getElementById('noClanView'); const clanMemberView = document.getElementById('clanMemberView'); const clanNameInput = document.getElementById('clanNameInput'); const createClanBtn = document.getElementById('createClanBtn'); const clanHallHeader = document.getElementById('clanHallHeader'); const clanList = document.getElementById('clanList'); const leaveClanBtn = document.getElementById('leaveClanBtn'); const bountiesGrid = document.getElementById('bountiesGrid'); const perkPointsDisplay = document.getElementById('perkPointsDisplay'); const attrStrengthLevel = document.getElementById('attrStrengthLevel'); const attrStrengthXpFill = document.getElementById('attrStrengthXpFill'); const attrStrengthXpText = document.getElementById('attrStrengthXpText'); const attrIntellectLevel = document.getElementById('attrIntellectLevel'); const attrIntellectXpFill = document.getElementById('attrIntellectXpFill'); const attrIntellectXpText = document.getElementById('attrIntellectXpText'); const attrWisdomLevel = document.getElementById('attrWisdomLevel'); const attrWisdomXpFill = document.getElementById('attrWisdomXpFill'); const attrWisdomXpText = document.getElementById('attrWisdomXpText'); const attrCharismaLevel = document.getElementById('attrCharismaLevel'); const attrCharismaXpFill = document.getElementById('attrCharismaXpFill'); const attrCharismaXpText = document.getElementById('attrCharismaXpText'); const perksSection = document.getElementById('perksSection'); const strengthPerksContainer = document.getElementById('strengthPerksContainer'); const intellectPerksContainer = document.getElementById('intellectPerksContainer'); const wisdomPerksContainer = document.getElementById('wisdomPerksContainer'); const charismaPerksContainer = document.getElementById('charismaPerksContainer'); const editQuestBtn = document.getElementById('editQuestBtn'); const editQuestModal = document.getElementById('editQuestModal'); const editBookTitleInput = document.getElementById('editBookTitleInput'); const editBookAuthorInput = document.getElementById('editBookAuthorInput'); const editBookGenreSelect = document.getElementById('editBookGenreSelect'); const editCustomGenreInput = document.getElementById('editCustomGenreInput'); const editBookTotalPagesInput = document.getElementById('editBookTotalPagesInput'); const saveQuestChangesBtn = document.getElementById('saveQuestChangesBtn'); const cancelEditQuestBtn = document.getElementById('cancelEditQuestBtn'); const featsGrid = document.getElementById('featsGrid'); const timelineContainer = document.getElementById('timelineContainer'); const timelineFilters = document.querySelector('.timeline-filters'); const statsTotalBooks = document.getElementById('statsTotalBooks'); const statsTotalPages = document.getElementById('statsTotalPages'); const statsMightiestBook = document.getElementById('statsMightiestBook'); const statsMightiestBookPages = document.getElementById('statsMightiestBookPages'); const statsFavGenre = document.getElementById('statsFavGenre'); const bossBarbImage = document.getElementById('bossBarbImage'); const bossBarbDialogue = document.getElementById('bossBarbDialogue').querySelector('.dialogue-text'); const playerLevelSpan = document.getElementById('playerLevel'); const xpBarFill = document.getElementById('xpBarFill'); const activeQuestDisplay = document.getElementById('activeQuestDisplay'); const noActiveQuestDisplay = document.getElementById('noActiveQuestDisplay'); const newQuestForm = document.getElementById('newQuestForm'); const bookTitleInput = document.getElementById('bookTitleInput'); const bookAuthorInput = document.getElementById('bookAuthorInput'); const bookGenreSelect = document.getElementById('bookGenreSelect'); const customGenreInput = document.getElementById('customGenreInput'); const bookTotalPagesInput = document.getElementById('bookTotalPagesInput'); const startNewQuestBtn = document.getElementById('startNewQuestBtn'); const addBookBtn = document.getElementById('addBookBtn'); const cancelAddBookBtn = document.getElementById('cancelAddBookBtn'); const completedBooksList = document.getElementById('completedBooksList'); const userNameSpan = document.getElementById('userName'); const authBtn = document.getElementById('authBtn'); const authForm = document.getElementById('authForm'); const authEmailInput = document.getElementById('authEmail'); const authUsernameInput = document.getElementById('authUsername'); const authPasswordInput = document.getElementById('authPassword'); const loginBtn = document.getElementById('loginBtn'); const signupBtn = document.getElementById('signupBtn'); const cancelAuthBtn = document.getElementById('cancelAuthBtn'); const authErrorMessage = document.getElementById('authErrorMessage'); const soundClick = document.getElementById('soundClick'); const soundPageTurn = document.getElementById('soundPageTurn'); const soundQuestComplete = document.getElementById('soundQuestComplete'); const soundQuestStart = document.getElementById('soundQuestStart'); const soundError = document.getElementById('soundError');
     
     // --- BARB_ISMS & STATE ---
-    const BARB_ISMS = { "Grizzled Veteran": { "welcome": ["Hmph. Another twig-arm. Ready for words or just to be food for worms?"], "book_completed": ["You crushed that book! Next!"], "general_encouragement": ["Good. Keep at it. Don't let your mind get soft."], "charmed_encouragement": ["Your progress is... acceptable. Continue.", "Hmph. Not bad. For a book-worm."], "saving_data": ["Recording your deeds..."], "quest_accepted": ["A new challenge! Do not fail me, whelp."], "quest_surrendered": ["You flee?! Cowards have no place in my war-band!"], "quest_undone": ["Hah! The tome returns from the grave!"], "error_undo": ["Finish your current battle before starting another!"], "error_page_count": ["YOU CANNOT READ MORE PAGES THAN EXIST, FOOL!"], "error": ["Fool! Not like that!"], "auth_errors": { "auth/invalid-email": "EMAIL BAD! NOT A REAL EMAIL, FOOL!", "auth/user-not-found": "NO WARRIOR WITH THAT EMAIL! SIGN UP, MAYBE?", "auth/wrong-password": "PASSWORD WRONG! TRY AGAIN, OR BRAIN SMASH!", "auth/email-already-in-use": "EMAIL TAKEN! ANOTHER WARRIOR GOT IT! USE ANOTHER!", "auth/weak-password": "PASSWORD WEAK! NEED 6+ CHARACTERS! BE STRONGER!", "default": "AUTH FAILED!" } } };
     let userData = {};
     let currentUser = null;
     let idleTimeout;
@@ -26,7 +54,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- UTILITIES & CORE FUNCTIONS ---
     const randomChoice = (arr) => arr[Math.floor(Math.random() * arr.length)];
     function playSound(soundElement) { if (soundElement) { soundElement.currentTime = 0; soundElement.play().catch(e => console.error("Sound playback failed:", e)); } }
-    function updateBarbarian(state, message = null) { clearTimeout(idleTimeout); let imageName; switch (state) { case 'pleased': imageName = 'NormalBarb.webp'; break; case 'angry': imageName = 'AngryBarb.webp'; break; case 'celebrate': imageName = 'CelebratingBarb.webp'; break; case 'idle': default: imageName = 'NormalBarb.webp'; break; } bossBarbImage.src = BARB_IMAGE_PATH + imageName; if (message) { bossBarbDialogue.textContent = message; } if (state !== 'idle') { idleTimeout = setTimeout(() => { bossBarbImage.src = BARB_IMAGE_PATH + 'NormalBarb.webp'; }, 5000); } }
+   function updateBarbarian(state, message = null) {
+  clearTimeout(idleTimeout);
+
+  const imageMap = {
+    'pleased': 'NormalBarb.webp',
+    'angry': 'AngryBarb.webp',
+    'celebrate': 'CelebratingBarb.webp',
+    'idle': 'NormalBarb.webp'
+  };
+
+  const imageName = imageMap[state] || 'NormalBarb.webp';
+  bossBarbImage.src = BARB_IMAGE_PATH + imageName;
+
+  if (message) {
+    bossBarbDialogue.innerHTML = message.replace(/\n/g, '<br>');
+  }
+
+  if (state !== 'idle') {
+    idleTimeout = setTimeout(() => {
+      bossBarbImage.src = BARB_IMAGE_PATH + 'NormalBarb.webp';
+    }, 5000);
+  }
+}
+
     const getXpForNextLevel = (currentLevel) => Math.floor(100 * Math.pow(currentLevel, 1.5));
     const getOverallLevel = (userObject = userData) => { if (!userObject.attributes) return 1; const { strength, intellect, wisdom, charisma } = userObject.attributes; return Math.floor((strength.level + intellect.level + wisdom.level + charisma.level) / 4); }
 
