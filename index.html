@@ -1,14 +1,28 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barbarian Book Boss</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=EB+Garamond:wght@400;700&display=swap" rel="stylesheet">
+    
+    <meta name="theme-color" content="#2c241f">
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
 
-<link rel="manifest" href="manifest.json">
-<script>
-  // These variables will hold your Firebase services.
-  // Declaring them here makes them accessible to your other scripts.
-  let auth;
-  let db;
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // These variables will hold your Firebase services.
+        let auth;
+        let db;
 
-  // Your web app's Firebase configuration
-  // This object should contain your actual API keys from the Firebase Console.
-const firebaseConfig = {
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
   apiKey: "AIzaSyBwCwos_xdDv-9YDYUsPB-bFqB5YdOwJ2M",
   authDomain: "barbarian-book-club.firebaseapp.com",
   projectId: "barbarian-book-club",
@@ -17,18 +31,18 @@ const firebaseConfig = {
   appId: "1:738320334350:web:330df7258ca2ccded3065f",
   measurementId: "G-ZJJ6ZY0909"
 };
-  // Initialize Firebase
-  const app = firebase.initializeApp(firebaseConfig);
 
-  // Initialize and assign the services to the variables
-  auth = firebase.auth();
-  db = firebase.firestore();
-
-  // You can add this log to confirm in the console that Firebase has started.
-  console.log("Firebase initialized successfully!");
-
-</script>
-
+        
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        
+        // Initialize and assign the services to the variables
+        auth = firebase.auth();
+        db = firebase.firestore();
+        
+        console.log("Firebase initialized successfully!");
+    </script>
+</head>
 
       
 </head>
