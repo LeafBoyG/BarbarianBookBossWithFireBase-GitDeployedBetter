@@ -1,20 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barbarian Book Boss</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=EB+Garamond:wght@400;700&display=swap" rel="stylesheet">
-        <meta name="theme-color" content="#2c241f">
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/png" href="assets/favicon.png">
 
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <link rel="manifest" href="manifest.json">
 <script>
   // These variables will hold your Firebase services.
@@ -24,14 +8,15 @@
 
   // Your web app's Firebase configuration
   // This object should contain your actual API keys from the Firebase Console.
-  const firebaseConfig = {
-          apiKey: "AIzaSyBwCwos_xdDv-9YDYUsPB-bFqB5YdOwJ2M",
+const firebaseConfig = {
+  apiKey: "AIzaSyBwCwos_xdDv-9YDYUsPB-bFqB5YdOwJ2M",
   authDomain: "barbarian-book-club.firebaseapp.com",
   projectId: "barbarian-book-club",
   storageBucket: "barbarian-book-club.firebasestorage.app",
   messagingSenderId: "738320334350",
-  appId: "1:738320334350:web:330df7258ca2ccded3065f"
-  }
+  appId: "1:738320334350:web:330df7258ca2ccded3065f",
+  measurementId: "G-ZJJ6ZY0909"
+};
   // Initialize Firebase
   const app = firebase.initializeApp(firebaseConfig);
 
@@ -294,26 +279,21 @@
     </div>
     
 
-    <script src="script.js"></script>
+     <script src="./script.js"></script>
 
-    <audio id="soundClick" src="assets/sounds/click.mp3" preload="auto"></audio>
-    <audio id="soundPageTurn" src="assets/sounds/page-turn.mp3" preload="auto"></audio>
-    <audio id="soundQuestComplete" src="assets/sounds/quest-complete.mp3" preload="auto"></audio>
-    <audio id="soundQuestStart" src="assets/sounds/quest-start.mp3" preload="auto"></audio>
-    <audio id="soundError" src="assets/sounds/error.mp3" preload="auto"></audio>
-<script>
+    <audio id="soundClick" src="./assets/sounds/click.mp3" preload="auto"></audio>
+    <audio id="soundPageTurn" src="./assets/sounds/page-turn.mp3" preload="auto"></audio>
+    <audio id="soundQuestComplete" src="./assets/sounds/quest-complete.mp3" preload="auto"></audio>
+    <audio id="soundQuestStart" src="./assets/sounds/quest-start.mp3" preload="auto"></audio>
+    <audio id="soundError" src="./assets/sounds/error.mp3" preload="auto"></audio>
+    <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                    })
-                    .catch(err => {
-                        console.log('ServiceWorker registration failed: ', err);
-                    });
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service worker registered.', reg))
+                    .catch(err => console.log('Service worker registration failed:', err));
             });
         }
     </script>
-
 </body>
 </html>
