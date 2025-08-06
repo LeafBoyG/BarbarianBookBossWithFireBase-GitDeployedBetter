@@ -15,7 +15,24 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    
+<script>
+                   const firebaseConfig = {
+          apiKey: "AIzaSyBwCwos_xdDv-9YDYUsPB-bFqB5YdOwJ2M",
+  authDomain: "barbarian-book-club.firebaseapp.com",
+  projectId: "barbarian-book-club",
+  storageBucket: "barbarian-book-club.firebasestorage.app",
+  messagingSenderId: "738320334350",
+  appId: "1:738320334350:web:330df7258ca2ccded3065f"
+};
+  // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+</script>
+
+
+
+      
 </head>
 <body>
     <div class="game-container">
