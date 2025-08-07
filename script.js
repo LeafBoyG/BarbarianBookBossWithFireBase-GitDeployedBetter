@@ -47,9 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ]
     };
     const BOUNTY_LIST = { weekly_pages: { id: 'weekly_pages', title: 'Weekly Page-Slayer', description: 'Read 500 pages within 7 days.', target: 500, reward: 750, type: 'pages' }, monthly_conqueror: { id: 'monthly_conqueror', title: 'Monthly Conqueror', description: 'Conquer 4 books in a single month.', target: 4, reward: 1500, type: 'books' } };
-
     const CLAN_BOUNTIES_LIST = {
-        epic_grind: { id: 'epic_grind', title: 'The Epic Grind', description: 'As a clan, conquer 3 books over 500 pages long in a month.', target: 3, reward: 500, type: 'epic_books' }
+        epic_grind: { id: 'epic_grind', title: 'The Epic Grind', description: 'As a clan, conquer 3 books over 500 pages long.', target: 3, reward: { perkPoints: 1 }, type: 'epic_books' },
+        genre_warfare: { id: 'genre_warfare', title: 'Genre Warfare', description: 'As a clan, conquer 5 Fantasy and 5 Sci-Fi books.', target: 10, reward: { xp: 2000 }, type: 'multi_genre' },
+        page_massacre: { id: 'page_massacre', title: 'Page Massacre', description: 'As a clan, read a total of 10,000 pages.', target: 10000, reward: { perkPoints: 1 }, type: 'total_pages' }
     };
     
     const UI = {
@@ -60,29 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
         featsView: document.getElementById('featsPage'),
         bountiesView: document.getElementById('bountiesPage'),
         clansView: document.getElementById('clansPage'),
-        nav: { readingLog: document.getElementById('readingLogNav'), attributes: document.getElementById('attributesNav'), feats: document.getElementById('featsNav'), stats: document.getElementById('statsNav'), journey: document.getElementById('journeyNav'), bounties: document.getElementById('bountiesNav'), clans: document.getElementById('clansNav'), },
-        clans: {
-            noClanView: document.getElementById('noClanView'),
-            memberView: document.getElementById('clanMemberView'),
-            nameInput: document.getElementById('clanNameInput'),
-            createBtn: document.getElementById('createClanBtn'),
-            list: document.getElementById('clanList'),
-            bannerName: document.getElementById('clanNameBanner'),
-            bannerMotto: document.getElementById('clanMottoBanner'),
-            statsPanel: document.getElementById('clanStatsPanel'),
-            bountyPanel: document.getElementById('clanBountyPanel'),
-            roster: document.getElementById('clanRoster'),
-            leaderboard: document.getElementById('clanLeaderboard'),
-            adminBtn: document.getElementById('clanAdminBtn'),
-            leaveBtn: document.getElementById('leaveClanBtn'),
+        nav: {
+            readingLog: document.getElementById('readingLogNav'), attributes: document.getElementById('attributesNav'), feats: document.getElementById('featsNav'), stats: document.getElementById('statsNav'), journey: document.getElementById('journeyNav'), bounties: document.getElementById('bountiesNav'), clans: document.getElementById('clansNav'),
+            hamburgerMenu: document.getElementById('hamburgerMenu'), linksContainer: document.getElementById('navLinksContainer'), menuOverlay: document.getElementById('menuOverlay')
         },
-        clanAdminModal: {
-            modal: document.getElementById('clanAdminModal'),
-            nameInput: document.getElementById('editClanNameInput'),
-            mottoInput: document.getElementById('editClanMottoInput'),
-            saveBtn: document.getElementById('saveClanChangesBtn'),
-            cancelBtn: document.getElementById('cancelClanChangesBtn'),
-        },
+        clans: { noClanView: document.getElementById('noClanView'), memberView: document.getElementById('clanMemberView'), nameInput: document.getElementById('clanNameInput'), createBtn: document.getElementById('createClanBtn'), list: document.getElementById('clanList'), bannerName: document.getElementById('clanNameBanner'), bannerMotto: document.getElementById('clanMottoBanner'), statsPanel: document.getElementById('clanStatsPanel'), bountyPanel: document.getElementById('clanBountyPanel'), roster: document.getElementById('clanRoster'), leaderboard: document.getElementById('clanLeaderboard'), adminBtn: document.getElementById('clanAdminBtn'), leaveBtn: document.getElementById('leaveClanBtn'), },
+        clanAdminModal: { modal: document.getElementById('clanAdminModal'), nameInput: document.getElementById('editClanNameInput'), mottoInput: document.getElementById('editClanMottoInput'), saveBtn: document.getElementById('saveClanChangesBtn'), cancelBtn: document.getElementById('cancelClanChangesBtn'), },
         bounties: { grid: document.getElementById('bountiesGrid'), },
         attributes: { perkPointsDisplay: document.getElementById('perkPointsDisplay'), perksSection: document.getElementById('perksSection'), strength: { level: document.getElementById('attrStrengthLevel'), xpFill: document.getElementById('attrStrengthXpFill'), xpText: document.getElementById('attrStrengthXpText'), perksContainer: document.getElementById('strengthPerksContainer') }, intellect: { level: document.getElementById('attrIntellectLevel'), xpFill: document.getElementById('attrIntellectXpFill'), xpText: document.getElementById('attrIntellectXpText'), perksContainer: document.getElementById('intellectPerksContainer') }, wisdom: { level: document.getElementById('attrWisdomLevel'), xpFill: document.getElementById('attrWisdomXpFill'), xpText: document.getElementById('attrWisdomXpText'), perksContainer: document.getElementById('wisdomPerksContainer') }, charisma: { level: document.getElementById('attrCharismaLevel'), xpFill: document.getElementById('attrCharismaXpFill'), xpText: document.getElementById('attrCharismaXpText'), perksContainer: document.getElementById('charismaPerksContainer') }, },
         editQuest: { btn: document.getElementById('editQuestBtn'), modal: document.getElementById('editQuestModal'), titleInput: document.getElementById('editBookTitleInput'), authorInput: document.getElementById('editBookAuthorInput'), genreSelect: document.getElementById('editBookGenreSelect'), customGenreInput: document.getElementById('editCustomGenreInput'), totalPagesInput: document.getElementById('editBookTotalPagesInput'), saveBtn: document.getElementById('saveQuestChangesBtn'), cancelBtn: document.getElementById('cancelEditQuestBtn'), },
@@ -134,118 +118,59 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function switchView(viewToShow) {
-        playSound(UI.sounds.click);
         Object.values(VIEWS).forEach(view => {
             view.element.classList.add('hidden');
-            view.nav.classList.remove('active');
+            if(view.nav) view.nav.classList.remove('active');
         });
         const targetView = VIEWS[viewToShow] || VIEWS[enums.views.LOG];
         targetView.element.classList.remove('hidden');
-        targetView.nav.classList.add('active');
+        if(targetView.nav) targetView.nav.classList.add('active');
         if (targetView.renderFunc) targetView.renderFunc();
     }
 
-    // DEBUG VERSION of renderClansPage
     async function renderClansPage() {
-        console.log("--- [DEBUG] Starting renderClansPage function ---");
-        if (!userData || !currentUser) {
-            console.log("[DEBUG] Stopped: userData or currentUser is missing.");
-            return;
-        }
-
+        if (!userData || !currentUser) return;
         const inClan = !!userData.clanId;
         UI.clans.noClanView.classList.toggle('hidden', inClan);
         UI.clans.memberView.classList.toggle('hidden', !inClan);
-        
-        console.log(`[DEBUG] User is in a clan: ${inClan}. Clan ID: ${userData.clanId}`);
-
         if (inClan) {
             try {
-                console.log("[DEBUG] Step 1: Fetching clan document from Firestore...");
-                const clanDoc = await db.collection('clans').doc(userData.clanId).get();
-
-                if (!clanDoc.exists) {
-                    console.error("--- [DEBUG] CRITICAL ERROR: Clan document not found in Firestore! ---");
-                    return handleLeaveClan(false);
+                const clanRef = db.collection('clans').doc(userData.clanId);
+                let clanDoc = await clanRef.get();
+                if (!clanDoc.exists) { return handleLeaveClan(false); }
+                let clanData = clanDoc.data();
+                if (!clanData.activeBounty) {
+                    const bountyKeys = Object.keys(CLAN_BOUNTIES_LIST);
+                    const newBountyId = randomChoice(bountyKeys);
+                    const newBounty = { bountyId: newBountyId, progress: 0, startDate: new Date().toISOString() };
+                    await clanRef.update({ activeBounty: newBounty });
+                    clanData.activeBounty = newBounty;
                 }
-                const clanData = clanDoc.data();
-                console.log("[DEBUG] Step 2: Clan data found successfully:", clanData);
-
                 const isLeader = isCurrentUser(clanData.leaderId);
-                
                 UI.clans.bannerName.textContent = clanData.name;
                 UI.clans.bannerMotto.textContent = clanData.motto || "No motto set.";
                 UI.clans.adminBtn.classList.toggle('hidden', !isLeader);
-
-                if (!clanData.memberIds || clanData.memberIds.length === 0) {
-                    console.warn("[DEBUG] Warning: Clan has no members listed in memberIds array.");
-                    UI.clans.roster.innerHTML = '<li>This clan has no members.</li>';
-                    return;
-                }
-                
-                console.log(`[DEBUG] Step 3: Fetching data for ${clanData.memberIds.length} members...`);
                 const memberPromises = clanData.memberIds.map(id => db.collection('users').doc(id).get());
                 const memberDocs = await Promise.all(memberPromises);
                 const members = memberDocs.map(doc => ({ id: doc.id, ...doc.data() }));
-                console.log("[DEBUG] Step 4: All member data fetched:", members);
-
-                let totalBooks = 0;
-                let totalPages = 0;
-                members.forEach(m => {
-                    totalBooks += m.completedQuests?.length || 0;
-                    totalPages += m.completedQuests?.reduce((sum, q) => sum + q.totalPages, 0) || 0;
-                });
-                console.log(`[DEBUG] Step 5: Calculated totals: ${totalBooks} books, ${totalPages} pages.`);
-
-                // Rendering stats
-                UI.clans.statsPanel.innerHTML = `
-                    <div class="clan-stat"><h4>Members</h4><p>${clanData.memberIds.length}</p></div>
-                    <div class="clan-stat"><h4>Total Books</h4><p>${totalBooks.toLocaleString()}</p></div>
-                    <div class="clan-stat"><h4>Total Pages</h4><p>${totalPages.toLocaleString()}</p></div>
-                `;
-                
-                // Rendering roster
-                UI.clans.roster.innerHTML = members.map(member => `
-                    <li class="clan-roster-item">
-                        <div class="roster-item-name">
-                            ${member.displayName || member.id.substring(0,8)}
-                            ${member.id === clanData.leaderId ? '<span class="leader-badge">★</span>' : ''}
-                        </div>
-                        <div class="roster-item-stats">
-                            Lvl ${getOverallLevel(member)}
-                            ${isLeader && !isCurrentUser(member.id) ? `<button class="kick-btn" data-kick-id="${member.id}" title="Kick Member">✖</button>` : ''}
-                        </div>
-                    </li>
-                `).join('');
-
-                // Rendering leaderboards
+                let totalBooks = members.reduce((sum, m) => sum + (m.completedQuests?.length || 0), 0);
+                let totalPages = members.reduce((sum, m) => sum + (m.completedQuests?.reduce((pSum, q) => pSum + q.totalPages, 0) || 0), 0);
+                UI.clans.statsPanel.innerHTML = `<div class="clan-stat"><h4>Members</h4><p>${clanData.memberIds.length}</p></div><div class="clan-stat"><h4>Total Books</h4><p>${totalBooks.toLocaleString()}</p></div><div class="clan-stat"><h4>Total Pages</h4><p>${totalPages.toLocaleString()}</p></div>`;
+                UI.clans.roster.innerHTML = members.map(member => `<li class="clan-roster-item"><div class="roster-item-name">${member.displayName || member.id.substring(0,8)}${member.id === clanData.leaderId ? '<span class="leader-badge">★</span>' : ''}</div><div class="roster-item-stats">Lvl ${getOverallLevel(member)}${isLeader && !isCurrentUser(member.id) ? `<button class="kick-btn" data-kick-id="${member.id}" title="Kick Member">✖</button>` : ''}</div></li>`).join('');
                 const sortedByBooks = [...members].sort((a, b) => (b.completedQuests?.length || 0) - (a.completedQuests?.length || 0));
                 const sortedByPages = [...members].sort((a, b) => (b.completedQuests?.reduce((s,q)=>s+q.totalPages,0)||0) - (a.completedQuests?.reduce((s,q)=>s+q.totalPages,0)||0));
-                UI.clans.leaderboard.innerHTML = `
-                    <h4>Total Books Conquered</h4>
-                    <ul class="clan-leaderboard-list">
-                        ${sortedByBooks.slice(0, 3).map(m => `<li class="clan-leaderboard-item"><span class="leaderboard-item-name">${m.displayName || m.id.substring(0,8)}</span><span class="leaderboard-item-score">${(m.completedQuests?.length || 0).toLocaleString()} books</span></li>`).join('')}
-                    </ul>
-                    <h4>Total Pages Read</h4>
-                    <ul class="clan-leaderboard-list">
-                        ${sortedByPages.slice(0, 3).map(m => `<li class="clan-leaderboard-item"><span class="leaderboard-item-name">${m.displayName || m.id.substring(0,8)}</span><span class="leaderboard-item-score">${(m.completedQuests?.reduce((s,q)=>s+q.totalPages,0)||0).toLocaleString()} pages</span></li>`).join('')}
-                    </ul>
-                `;
-                
-                console.log("--- [DEBUG] Render complete. All panels should now be populated. ---");
-
-            } catch (error) {
-                console.error("--- [DEBUG] AN ERROR OCCURRED during clan page render: ---", error);
-                UI.clans.roster.innerHTML = '<li>Error loading clan data. Check the console for details.</li>';
-            }
+                UI.clans.leaderboard.innerHTML = `<h4>Total Books Conquered</h4><ul class="clan-leaderboard-list">${sortedByBooks.slice(0, 3).map(m => `<li class="clan-leaderboard-item"><span class="leaderboard-item-name">${m.displayName || m.id.substring(0,8)}</span><span class="leaderboard-item-score">${(m.completedQuests?.length || 0).toLocaleString()} books</span></li>`).join('')}</ul><h4>Total Pages Read</h4><ul class="clan-leaderboard-list">${sortedByPages.slice(0, 3).map(m => `<li class="clan-leaderboard-item"><span class="leaderboard-item-name">${m.displayName || m.id.substring(0,8)}</span><span class="leaderboard-item-score">${(m.completedQuests?.reduce((s,q)=>s+q.totalPages,0)||0).toLocaleString()} pages</span></li>`).join('')}</ul>`;
+                const activeBounty = clanData.activeBounty;
+                if (activeBounty && CLAN_BOUNTIES_LIST[activeBounty.bountyId]) {
+                    const bountyDef = CLAN_BOUNTIES_LIST[activeBounty.bountyId];
+                    const percentage = (activeBounty.progress / bountyDef.target) * 100;
+                    UI.clans.bountyPanel.innerHTML = `<h4>${bountyDef.title}</h4><p>${bountyDef.description}</p><div class="progress-bar-container"><div class="progress-bar"><div class="progress-bar-fill" style="width: ${percentage}%;"></div></div><div class="progress-bar-text">${activeBounty.progress.toLocaleString()} / ${bountyDef.target.toLocaleString()}</div></div><div class="bounty-reward">Reward: ${bountyDef.reward.perkPoints ? `${bountyDef.reward.perkPoints} Perk Point(s)` : `${bountyDef.reward.xp} XP`} for all members</div>`;
+                } else { UI.clans.bountyPanel.innerHTML = `<p>A new bounty will be assigned soon!</p>`; }
+            } catch (error) { console.error("Error rendering clan page:", error); }
         } else {
-            console.log("[DEBUG] User is not in a clan, rendering the 'join clan' view.");
             try {
                 const clansSnapshot = await db.collection('clans').orderBy('name').limit(20).get();
-                UI.clans.list.innerHTML = clansSnapshot.empty ? '<li class="clan-list-item-placeholder">No war-bands have been founded yet.</li>' : clansSnapshot.docs.map(doc => {
-                    const clan = doc.data();
-                    return `<li class="clan-list-item"><div class="clan-info"><div class="name">${clan.name}</div><div class="members">${clan.memberIds.length} member(s)</div></div><button class="join-btn" data-clan-id="${doc.id}" data-clan-name="${clan.name}">Join</button></li>`;
-                }).join('');
+                UI.clans.list.innerHTML = clansSnapshot.empty ? '<li class="clan-list-item-placeholder">No war-bands have been founded yet.</li>' : clansSnapshot.docs.map(doc => { const clan = doc.data(); return `<li class="clan-list-item"><div class="clan-info"><div class="name">${clan.name}</div><div class="members">${clan.memberIds.length} member(s)</div></div><button class="join-btn" data-clan-id="${doc.id}" data-clan-name="${clan.name}">Join</button></li>`; }).join('');
             } catch (error) { console.error("Error fetching clans:", error); }
         }
     }
@@ -476,6 +401,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
+    
+    async function completeClanBounty(clanId, bounty) {
+        updateBarbarian('celebrate', `Hah! Your war-band has completed the bounty: ${bounty.title}!`);
+        const batch = db.batch();
+        const clanRef = db.collection('clans').doc(clanId);
+        const clanDoc = await clanRef.get();
+        const memberIds = clanDoc.data().memberIds;
+        for (const memberId of memberIds) {
+            const memberRef = db.collection('users').doc(memberId);
+            if (bounty.reward.perkPoints) { batch.update(memberRef, { perkPoints: firebase.firestore.FieldValue.increment(bounty.reward.perkPoints) }); }
+            if (bounty.reward.xp) { batch.update(memberRef, { 'attributes.strength.xp': firebase.firestore.FieldValue.increment(bounty.reward.xp) }); }
+        }
+        batch.update(clanRef, { activeBounty: null });
+        await batch.commit();
+        renderClansPage();
+    }
 
     async function handleUnlockPerk(event) {
         const perkCard = event.target.closest('.perk-card.available');
@@ -514,10 +455,22 @@ document.addEventListener('DOMContentLoaded', () => {
     async function handleLogPages() {
         playSound(UI.sounds.pageTurn);
         const pages = parseInt(UI.activeQuest.pagesReadInput.value);
+        if (isNaN(pages) || pages <= 0) { return; }
         const quest = userData.activeQuest;
         const remainingPages = quest.totalPages - quest.currentPage;
-        if (isNaN(pages) || pages <= 0) { playSound(UI.sounds.error); updateBarbarian('angry', randomChoice(BARB_ISMS["Grizzled Veteran"].error)); return; }
         if (pages > remainingPages) { playSound(UI.sounds.error); updateBarbarian('angry', `${BARB_ISMS["Grizzled Veteran"].error_page_count[0]} YOU ONLY HAVE ${remainingPages} PAGES LEFT!`); return; }
+        if (userData.clanId && pages > 0) {
+            const clanRef = db.collection('clans').doc(userData.clanId);
+            clanRef.get().then(doc => {
+                const activeBounty = doc.data()?.activeBounty;
+                if (activeBounty && CLAN_BOUNTIES_LIST[activeBounty.bountyId]?.type === 'total_pages') {
+                    const bountyDef = CLAN_BOUNTIES_LIST[activeBounty.bountyId];
+                    const newProgress = (activeBounty.progress || 0) + pages;
+                    if (newProgress >= bountyDef.target) { setTimeout(() => completeClanBounty(userData.clanId, bountyDef), 500); }
+                    else { clanRef.update({ 'activeBounty.progress': firebase.firestore.FieldValue.increment(pages) }); }
+                }
+            });
+        }
         quest.currentPage += pages; userData.pagesReadToday = (userData.pagesReadToday || 0) + pages;
         applyXpGains(calculateXpGains({ type: 'logPages', pages }));
         if(userData.bounties?.weekly_pages) { userData.bounties.weekly_pages.progress = (userData.bounties.weekly_pages.progress || 0) + pages; }
@@ -531,17 +484,26 @@ document.addEventListener('DOMContentLoaded', () => {
     async function handleConquerQuest() {
         playSound(UI.sounds.questComplete);
         const quest = userData.activeQuest; if (!quest) return;
-
-        if (userData.clanId && quest.totalPages >= 500) {
+        if (userData.clanId) {
             const clanRef = db.collection('clans').doc(userData.clanId);
-            db.runTransaction(async (transaction) => {
-                const clanDoc = await transaction.get(clanRef);
-                if (!clanDoc.exists) { throw "Clan does not exist!"; }
-                const newProgress = (clanDoc.data().bountyProgress || 0) + 1;
-                transaction.update(clanRef, { bountyProgress: newProgress });
-            }).catch(err => console.error("Clan bounty update failed: ", err));
+            try {
+                await db.runTransaction(async (transaction) => {
+                    const clanDoc = await transaction.get(clanRef);
+                    if (!clanDoc.exists) throw "Clan does not exist!";
+                    const activeBounty = clanDoc.data().activeBounty;
+                    if (activeBounty) {
+                        const bountyDef = CLAN_BOUNTIES_LIST[activeBounty.bountyId];
+                        let progressMade = 0;
+                        if (bountyDef.type === 'epic_books' && quest.totalPages >= 500) { progressMade = 1; }
+                        if (progressMade > 0) {
+                            const newProgress = (activeBounty.progress || 0) + progressMade;
+                            if (newProgress >= bountyDef.target) { setTimeout(() => completeClanBounty(userData.clanId, bountyDef), 500); }
+                            else { transaction.update(clanRef, { 'activeBounty.progress': newProgress }); }
+                        }
+                    }
+                });
+            } catch (e) { console.error("Clan bounty transaction failed: ", e); }
         }
-
         applyXpGains(calculateXpGains({ type: 'conquer', quest }));
         const genreLower = quest.genre.toLowerCase();
         if (!userData.conqueredGenres.includes(genreLower)) { userData.conqueredGenres.push(genreLower); }
@@ -601,7 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateBarbarian('pleased', 'Forging your new War-Band...');
         try {
             const batch = db.batch(); const clanRef = db.collection('clans').doc(); const userRef = db.collection('users').doc(currentUser.uid);
-            const clanData = { name: clanName, motto: "The mightiest war-band!", leaderId: currentUser.uid, memberIds: [currentUser.uid], createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+            const clanData = { name: clanName, motto: "The mightiest war-band!", leaderId: currentUser.uid, memberIds: [currentUser.uid], createdAt: firebase.firestore.FieldValue.serverTimestamp(), activeBounty: null };
             batch.set(clanRef, clanData); batch.update(userRef, { clanId: clanRef.id, clanName: clanName });
             await batch.commit();
             userData.clanId = clanRef.id; userData.clanName = clanName;
@@ -679,31 +641,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function getAuthErrorMessage(errorCode) { return (BARB_ISMS["Grizzled Veteran"].auth_errors[errorCode]) || BARB_ISMS["Grizzled Veteran"].auth_errors["default"]; }
     function handleAuthButtonClick() { playSound(UI.sounds.click); if (currentUser) { auth.signOut(); } else { UI.auth.form.classList.remove('hidden'); clearAuthError(); } }
     async function handleLogin(e) { e.preventDefault(); playSound(UI.sounds.click); clearAuthError(); try { await auth.signInWithEmailAndPassword(UI.auth.emailInput.value, UI.auth.passwordInput.value); } catch (error) { playSound(UI.sounds.error); updateBarbarian('angry'); showAuthError(getAuthErrorMessage(error.code)); } }
-   async function handleSignup(e) {
-    e.preventDefault();
-    playSound(UI.sounds.click);
-    clearAuthError();
-
-    
-    const username = UI.auth.usernameInput.value.trim();
-    if (!username) {
-        playSound(UI.sounds.error);
-        updateBarbarian('angry');
-        showAuthError("USERNAME IS REQUIRED, WHELP!");
-        return; // Stop the function if username is missing
+    async function handleSignup(e) {
+        e.preventDefault(); playSound(UI.sounds.click); clearAuthError();
+        const username = UI.auth.usernameInput.value.trim();
+        if (!username) { playSound(UI.sounds.error); updateBarbarian('angry'); showAuthError("USERNAME IS REQUIRED, WHELP!"); return; }
+        try { const userCredential = await auth.createUserWithEmailAndPassword(UI.auth.emailInput.value, UI.auth.passwordInput.value); await userCredential.user.updateProfile({ displayName: username }); } catch (error) { playSound(UI.sounds.error); updateBarbarian('angry'); showAuthError(getAuthErrorMessage(error.code)); }
     }
-    // END OF NEW BLOCK
-
-    try {
-        const userCredential = await auth.createUserWithEmailAndPassword(UI.auth.emailInput.value, UI.auth.passwordInput.value);
-      
-        await userCredential.user.updateProfile({ displayName: username });
-    } catch (error) {
-        playSound(UI.sounds.error);
-        updateBarbarian('angry');
-        showAuthError(getAuthErrorMessage(error.code));
-    }
-}
     async function saveUserDataToFirestore() { if (currentUser) { try { await db.collection('users').doc(currentUser.uid).set(userData); } catch (error) { console.error("Error saving user data:", error); updateBarbarian('angry', "Could not save your progress!"); } } }
     async function loadUserDataFromFirestore() {
         const userRef = db.collection('users').doc(currentUser.uid); const doc = await userRef.get();
@@ -721,7 +664,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function initializeEventListeners() {
-        Object.values(VIEWS).forEach(view => view.nav.addEventListener('click', () => switchView(view.element.id.replace('Page', '').replace('View', '').replace('main', 'log'))));
+        const toggleMenu = () => {
+            document.body.classList.toggle('menu-open');
+        };
+        UI.nav.hamburgerMenu.addEventListener('click', toggleMenu);
+        UI.nav.menuOverlay.addEventListener('click', toggleMenu);
+        
+        UI.nav.linksContainer.addEventListener('click', (event) => {
+            if (event.target.classList.contains('nav-item')) {
+                playSound(UI.sounds.click);
+                if (document.body.classList.contains('menu-open')) {
+                    toggleMenu();
+                }
+                const viewId = event.target.id.replace('Nav', '');
+                const viewKey = viewId === 'readingLog' ? 'log' : viewId;
+                switchView(viewKey);
+            }
+        });
+        
         UI.attributes.perksSection.addEventListener('click', handleUnlockPerk);
         UI.journey.filters.addEventListener('click', (event) => { if (event.target.classList.contains('filter-btn')) { playSound(UI.sounds.click); UI.journey.filters.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active')); event.target.classList.add('active'); currentJourneyFilter = event.target.dataset.filter; renderJourneyPage(); } });
         UI.bounties.grid.addEventListener('click', handleAcceptBounty);

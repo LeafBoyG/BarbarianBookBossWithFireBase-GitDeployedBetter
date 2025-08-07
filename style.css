@@ -1,7 +1,6 @@
 /* ==========================================================================
    VARIABLES & GLOBAL RESET
    ========================================================================== */
-
 :root {
   --bg-deep: #17110c;
   --bg-medium: #2c241f;
@@ -36,10 +35,13 @@ body {
   line-height: 1.6;
 }
 
+body.menu-open {
+    overflow: hidden;
+}
+
 /* ==========================================================================
    MAIN LAYOUT & CONTAINERS
    ========================================================================== */
-
 .game-container {
   width: 100%;
   max-width: 950px;
@@ -53,21 +55,12 @@ body {
   display: flex;
   flex-direction: column;
 }
-
-/* All main page views share these layout properties */
-.game-ui-layout, 
-#statsPage, 
-#journeyPage, 
-#attributesPage, 
-#featsPage, 
-#bountiesPage, 
-#clansPage {
+.game-ui-layout, #statsPage, #journeyPage, #attributesPage, #featsPage, #bountiesPage, #clansPage {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   padding: 1rem;
 }
-
 .ui-panel {
   flex: 1 1 45%;
   background-color: var(--bg-light);
@@ -84,7 +77,6 @@ body {
 /* ==========================================================================
    HEADER & NAVIGATION
    ========================================================================== */
-
 header {
   background-color: var(--accent-navy);
   text-align: center;
@@ -92,7 +84,6 @@ header {
   border-bottom: 2px solid var(--border-dark);
   box-shadow: inset 0 -3px 8px var(--shadow-deep);
 }
-
 header h1 {
   font-family: 'Cinzel Decorative', serif;
   color: var(--accent-gold);
@@ -102,7 +93,6 @@ header h1 {
   animation: pulse-glow 8s ease-in-out infinite;
   margin: 0 0 .5rem;
 }
-
 header p {
   font-family: 'Cinzel Decorative', serif;
   font-size: clamp(0.8rem, 3vw, 1rem);
@@ -111,7 +101,6 @@ header p {
   text-transform: uppercase;
   margin: 0;
 }
-
 .top-nav {
   display: flex;
   align-items: center;
@@ -119,10 +108,14 @@ header p {
   background: var(--bg-medium);
   border-bottom: 3px solid var(--border-dark);
   box-shadow: inset 0 -4px 10px var(--shadow-deep);
-  flex-wrap: wrap;
-  gap: 0 0.5rem;
+  flex-wrap: nowrap;
+  justify-content: space-between;
 }
-
+.nav-links-container {
+    display: flex;
+    align-items: center;
+    gap: 0 0.5rem;
+}
 .nav-item {
   font-family: 'Cinzel Decorative', serif;
   text-transform: uppercase;
@@ -133,26 +126,86 @@ header p {
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: all .2s ease;
+  white-space: nowrap;
 }
-
 .nav-item.active { 
   color: var(--accent-gold); 
   border-bottom-color: var(--accent-gold); 
 }
-
 .nav-item:hover:not(.active):not(.disabled) { 
   color: var(--accent-gold); 
 }
-
 .nav-item.disabled { 
   opacity: .5; 
   cursor: not-allowed; 
+}
+.user-auth-section {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-left: 1rem;
+}
+.user-name {
+    color: var(--accent-gold);
+    text-transform: capitalize;
+    font-size: clamp(0.8rem, 2.5vw, 1rem);
+    white-space: nowrap;
+}
+
+
+/* --- Slide-In Menu & Hamburger Styles --- */
+.hamburger-menu {
+    display: none;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 2.25rem;
+    height: 2.25rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 2000;
+    position: relative;
+}
+.hamburger-menu span {
+    width: 2rem;
+    height: 3px;
+    background: var(--text-secondary);
+    border-radius: 10px;
+    transition: all 0.3s ease-in-out;
+    transform-origin: center;
+}
+body.menu-open .hamburger-menu span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 6px);
+}
+body.menu-open .hamburger-menu span:nth-child(2) {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+body.menu-open .hamburger-menu span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -6px);
+}
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 998;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+body.menu-open .menu-overlay {
+    opacity: 1;
+    visibility: visible;
 }
 
 /* ==========================================================================
    TYPOGRAPHY & HEADERS
    ========================================================================== */
-
 .section-header { 
   position: relative; 
   font-family: 'Cinzel Decorative', serif; 
@@ -163,12 +216,10 @@ header p {
   padding-bottom: .5rem; 
   text-shadow: 0 0 4px var(--shadow-deep); 
 }
-
 .page-header { 
   text-align: center; 
   padding: 1rem; 
 }
-
 .page-header h2 { 
   font-family: 'Cinzel Decorative', serif; 
   font-size: clamp(1.8rem, 5vw, 2.5rem); 
@@ -176,7 +227,6 @@ header p {
   text-shadow: 0 0 8px var(--shadow-glow); 
   margin: 0; 
 }
-
 .page-header p { 
   font-size: 1rem; 
   color: var(--text-secondary); 
@@ -186,657 +236,125 @@ header p {
 /* ==========================================================================
    COMPONENTS
    ========================================================================== */
-
-/* --- Barb Panel & Dialogue --- */
-.boss-barb-panel { 
-  align-items: center; 
-}
-
-.barb-image-container { 
-  background: var(--bg-medium); 
-  border: 2px solid var(--accent-gold); 
-  padding: 6px; 
-  box-shadow: inset 0 0 10px var(--shadow-deep), 0 0 15px var(--shadow-glow); 
-}
-
-.boss-barb-image { 
-  display: block; 
-  width: 150px; 
-  height: auto; 
-  border: 1px solid var(--border-dark); 
-}
-
-.boss-barb-dialogue { 
-  background: var(--bg-medium); 
-  border-left: 5px solid var(--accent-gold); 
-  border-radius: 6px; 
-  padding: 1rem; 
-  text-align: center; 
-  min-height: 90px; 
-  font-size: 1rem; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  box-shadow: inset 0 0 8px var(--shadow-deep); 
-}
-
-/* --- Progress & XP Bars --- */
-.xp-bar-container, 
-.progress-bar-container { 
-  display: flex; 
-  flex-direction: column; 
-  gap: .5rem; 
-  width: 100%; 
-}
-
-.xp-bar-label { 
-  font-family: 'EB Garamond', serif; 
-  font-weight: 700; 
-  text-transform: uppercase; 
-  text-align: center; 
-  color: var(--text-secondary); 
-  font-size: 0.9rem; 
-}
-
-.progress-bar-text { 
-  font-size: .9rem; 
-  color: var(--text-secondary); 
-  text-align: right; 
-}
-
-.xp-bar, 
-.progress-bar { 
-  width: 100%; 
-  height: 12px; 
-  border-radius: 6px; 
-  overflow: hidden; 
-  background: var(--bg-deep); 
-  border: 1px solid var(--border-dark); 
-  box-shadow: inset 0 1px 3px var(--shadow-deep); 
-}
-
-.progress-bar { 
-  height: 20px; 
-  border-radius: 10px; 
-}
-
-.xp-bar-fill, 
-.progress-bar-fill { 
-  height: 100%; 
-  border-radius: inherit; 
-  transition: width .5s ease-in-out; 
-}
-
-.xp-bar-fill { 
-  background: var(--accent-green); 
-}
-
-.progress-bar-fill { 
-  background: var(--border-gold-dark); 
-}
-
-
-/* --- UI Cards (Base Component) --- */
-.ui-card {
-  position: relative;
-  background-color: var(--bg-light);
-  border: 2px solid var(--border-dark);
-  border-radius: 6px;
-  padding: 1.25rem;
-  text-align: center;
-  box-shadow: inset 0 0 10px rgba(0,0,0,.5);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.ui-card.stat-card::before,
-.ui-card.attribute-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: var(--border-light);
-  opacity: .5;
-}
-
-.stat-label { 
-  font-size: 1rem; 
-  color: var(--text-secondary); 
-  text-transform: uppercase; 
-  letter-spacing: 1.5px; 
-}
-
-.stat-value { 
-  font-family: 'Cinzel Decorative', serif; 
-  font-size: clamp(2.2rem, 7vw, 2.8rem); 
-  font-weight: 700; 
-  color: var(--text-primary); 
-  line-height: 1.1; 
-  text-shadow: 0 0 10px var(--shadow-glow); 
-}
-
+.boss-barb-panel { align-items: center; }
+.barb-image-container { background: var(--bg-medium); border: 2px solid var(--accent-gold); padding: 6px; box-shadow: inset 0 0 10px var(--shadow-deep), 0 0 15px var(--shadow-glow); }
+.boss-barb-image { display: block; width: 150px; height: auto; border: 1px solid var(--border-dark); }
+.boss-barb-dialogue { background: var(--bg-medium); border-left: 5px solid var(--accent-gold); border-radius: 6px; padding: 1rem; text-align: center; min-height: 90px; font-size: 1rem; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 8px var(--shadow-deep); }
+.xp-bar-container, .progress-bar-container { display: flex; flex-direction: column; gap: .5rem; width: 100%; }
+.xp-bar-label { font-family: 'EB Garamond', serif; font-weight: 700; text-transform: uppercase; text-align: center; color: var(--text-secondary); font-size: 0.9rem; }
+.progress-bar-text { font-size: .9rem; color: var(--text-secondary); text-align: right; }
+.xp-bar, .progress-bar { width: 100%; height: 12px; border-radius: 6px; overflow: hidden; background: var(--bg-deep); border: 1px solid var(--border-dark); box-shadow: inset 0 1px 3px var(--shadow-deep); }
+.progress-bar { height: 20px; border-radius: 10px; }
+.xp-bar-fill, .progress-bar-fill { height: 100%; border-radius: inherit; transition: width .5s ease-in-out; }
+.xp-bar-fill { background: var(--accent-green); }
+.progress-bar-fill { background: var(--border-gold-dark); }
+.ui-card { position: relative; background-color: var(--bg-light); border: 2px solid var(--border-dark); border-radius: 6px; padding: 1.25rem; text-align: center; box-shadow: inset 0 0 10px rgba(0,0,0,.5); display: flex; flex-direction: column; gap: 1rem; }
+.ui-card.stat-card::before, .ui-card.attribute-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--border-light); opacity: .5; }
+.stat-label { font-size: 1rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1.5px; }
+.stat-value { font-family: 'Cinzel Decorative', serif; font-size: clamp(2.2rem, 7vw, 2.8rem); font-weight: 700; color: var(--text-primary); line-height: 1.1; text-shadow: 0 0 10px var(--shadow-glow); }
 .attribute-header h3 { font-size: 1.5rem; }
-.attribute-xp-bar { height: 10px; }
-.attribute-xp-text { font-size: .8rem; }
-
 .perk-card { padding: 1rem; }
 .perk-name { font-size: 1rem; }
 .perk-description, .perk-requirement { font-size: .85rem; }
-
 .feat-name { font-size: 1.2rem; }
 .feat-description { font-size: .9rem; }
-
 .bounty-card h3 { font-size: 1.2rem; }
 .bounty-card p { font-size: .9rem; }
-
-/* Grids for card layouts */
-.stats-grid, 
-.attributes-grid, 
-.feats-grid, 
-.bounties-grid, 
-.perk-container { 
-  display: grid; 
-  grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); 
-  gap: 1rem; 
-}
-
-
-/* --- Forms & Buttons --- */
-.input-group { 
-  display: flex; 
-  flex-direction: column; 
-  gap: .5rem; 
-  background-color: var(--bg-medium); 
-  border: 1px solid var(--border-dark); 
-  padding: 1.25rem; 
-  border-radius: 6px; 
-  box-shadow: inset 0 0 8px var(--shadow-deep); 
-}
-
-.input-group label { 
-  font-family: 'Cinzel Decorative', serif; 
-  font-size: .9rem; 
-  color: var(--text-secondary); 
-  text-transform: uppercase; 
-  margin-bottom: -.25rem; 
-}
-
-input[type=text], 
-input[type=number], 
-select { 
-  width: 100%; 
-  padding: .8rem 1rem; 
-  font-size: 1rem; 
-  font-family: 'EB Garamond', serif; 
-  background: var(--bg-tertiary); 
-  color: var(--text-primary); 
-  border: 1px solid var(--border-dark); 
-  border-radius: 4px; 
-}
-
-select { 
-  appearance: none; 
-  -webkit-appearance: none; 
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23D1C7B8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E"); 
-  background-repeat: no-repeat; 
-  background-position: right 1rem center; 
-  background-size: 1em; 
-}
-
-input:focus-visible, 
-select:focus-visible { 
-  outline: 2px solid var(--accent-gold); 
-  outline-offset: 2px; 
-  box-shadow: 0 0 12px var(--shadow-glow); 
-}
-
-.form-actions { 
-  display: flex; 
-  gap: 1rem; 
-  margin-top: 1rem; 
-}
-
-button, .auth-button { 
-  width: 100%; 
-  padding: 12px 18px; 
-  font-size: 1rem; 
-  border-radius: 4px; 
-  font-family: 'EB Garamond', serif; 
-  font-weight: 700; 
-  text-transform: uppercase; 
-  border: 1px solid var(--border-dark); 
-  box-shadow: 0 4px 12px var(--shadow-deep); 
-  cursor: pointer; 
-  transition: all .25s ease; 
-}
-
-button { 
-  background: var(--border-gold-dark); 
-  color: var(--bg-deep); 
-}
-
-button:hover { 
-  background: var(--accent-gold); 
-  color: #000; 
-  box-shadow: 0 6px 15px var(--shadow-deep), 0 0 10px var(--shadow-glow); 
-  transform: translateY(-2px); 
-}
-
-button:active { 
-  background: var(--accent-gold-dark); 
-  transform: translateY(1px); 
-  box-shadow: inset 0 2px 5px var(--shadow-deep); 
-}
-
-/* Button Variants */
-.start-quest-button { 
-  font-family: 'Cinzel Decorative', serif; 
-  font-weight: 400; 
-  font-size: 1.2rem; 
-  padding: 16px; 
-}
-
+.stats-grid, .attributes-grid, .feats-grid, .bounties-grid, .perk-container { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 1rem; }
+.input-group { display: flex; flex-direction: column; gap: .5rem; background-color: var(--bg-medium); border: 1px solid var(--border-dark); padding: 1.25rem; border-radius: 6px; box-shadow: inset 0 0 8px var(--shadow-deep); }
+.input-group label { font-family: 'Cinzel Decorative', serif; font-size: .9rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: -.25rem; }
+input[type=text], input[type=number], select, input[type=email], input[type=password] { width: 100%; padding: .8rem 1rem; font-size: 1rem; font-family: 'EB Garamond', serif; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-dark); border-radius: 4px; }
+select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23D1C7B8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; }
+input:focus-visible, select:focus-visible { outline: 2px solid var(--accent-gold); outline-offset: 2px; box-shadow: 0 0 12px var(--shadow-glow); }
+.form-actions { display: flex; gap: 1rem; margin-top: 1rem; }
+button, .auth-button { width: 100%; padding: 12px 18px; font-size: 1rem; border-radius: 4px; font-family: 'EB Garamond', serif; font-weight: 700; text-transform: uppercase; border: 1px solid var(--border-dark); box-shadow: 0 4px 12px var(--shadow-deep); cursor: pointer; transition: all .25s ease; }
+button { background: var(--border-gold-dark); color: var(--bg-deep); }
+button:hover { background: var(--accent-gold); color: #000; box-shadow: 0 6px 15px var(--shadow-deep), 0 0 10px var(--shadow-glow); transform: translateY(-2px); }
+button:active { background: var(--accent-gold-dark); transform: translateY(1px); box-shadow: inset 0 2px 5px var(--shadow-deep); }
+.start-quest-button { font-family: 'Cinzel Decorative', serif; font-weight: 400; font-size: 1.2rem; padding: 16px; }
 .conquer-button { background: var(--accent-green); color: var(--text-primary); }
 .cancel-button, .surrender-button { background: var(--accent-red); color: var(--text-primary); }
-
-.undo-btn { 
-  font-family: sans-serif; 
-  font-weight: 700; 
-  font-size: 1rem; 
-  padding: 2px 8px; 
-  margin-left: 10px; 
-  float: right; 
-  line-height: 1; 
-  background: var(--bg-light); 
-  color: var(--text-secondary); 
-  box-shadow: none; 
-  width: auto; 
-}
-
-.edit-btn { 
-  float: right; 
-  width: auto; 
-  padding: 4px 12px; 
-  font-size: .9rem; 
-  margin-top: 5px; 
-  background: var(--bg-light); 
-  color: var(--text-secondary); 
-  box-shadow: none; 
-}
+.undo-btn, .edit-btn, .kick-btn { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+.undo-btn { font-family: sans-serif; font-weight: 700; font-size: 1rem; padding: 2px 8px; margin-left: 10px; float: right; line-height: 1; background: var(--bg-light); color: var(--text-secondary); box-shadow: none; width: auto; }
+.edit-btn { float: right; width: auto; padding: 4px 12px; font-size: .9rem; margin-top: 5px; background: var(--bg-light); color: var(--text-secondary); box-shadow: none; }
+a, button { -webkit-tap-highlight-color: transparent; }
 
 /* ==========================================================================
    PAGE-SPECIFIC STYLES
    ========================================================================== */
-
-/* --- Main Reading Log --- */
-#noActiveQuestDisplay { 
-  text-align: center; 
-  padding: 2rem 1rem; 
-  border: 2px dashed var(--border-light); 
-  border-radius: 6px; 
-}
-
-.hallOfConquests ul { 
-  list-style: none; 
-  padding: 0; 
-  margin: 0; 
-}
-
-.hallOfConquests li { 
-  background: rgba(0, 0, 0, .1); 
-  padding: 10px; 
-  margin-bottom: 8px; 
-  border-radius: 4px; 
-  border-bottom: 1px solid var(--border-dark); 
-  color: var(--text-secondary); 
-}
-
-.hallOfConquests li span { 
-  color: var(--text-primary); 
-  font-weight: 700; 
-}
-
-/* --- Journey/Timeline --- */
-.timeline { 
-  position: relative; 
-  padding: 2rem 0; 
-  margin-top: 1rem; 
-}
-
-.timeline::before { 
-  content: ''; 
-  position: absolute; 
-  top: 0; 
-  left: 15px; 
-  height: 100%; 
-  width: 4px; 
-  background: var(--border-dark); 
-  border-radius: 2px; 
-}
-
-.timeline-entry { 
-  position: relative; 
-  margin-bottom: 2.5rem; 
-  padding-left: 40px; 
-}
-
-.timeline-entry::after { 
-  content: ''; 
-  position: absolute; 
-  left: 8px; 
-  top: 5px; 
-  width: 18px; 
-  height: 18px; 
-  border-radius: 50%; 
-  background: var(--accent-gold); 
-  border: 4px solid var(--border-dark); 
-  z-index: 1; 
-}
-
-.timeline-card { 
-  background-color: var(--bg-light); 
-  border: 2px solid var(--border-dark); 
-  border-radius: 6px; 
-  padding: 1rem; 
-  position: relative; 
-  box-shadow: 0 5px 15px var(--shadow-deep); 
-}
-
-.timeline-divider { 
-  text-align: center;
-  margin: 2rem 0;
-}
-
-.timeline-divider span { 
-  font-family: 'Cinzel Decorative', serif; 
-  color: var(--text-secondary); 
-  font-size: 1.2rem; 
-  padding: 0 1rem; 
-  background-color: var(--bg-medium); 
-}
-
-.timeline-filters { 
-  display: flex; 
-  justify-content: center; 
-  gap: .5rem; 
-  margin-bottom: 1rem; 
-}
-
-.filter-btn { 
-  font-family: 'EB Garamond', serif; 
-  background-color: transparent; 
-  border: 2px solid var(--border-dark); 
-  color: var(--text-secondary); 
-  padding: .4rem 1rem; 
-  width: auto; 
-  box-shadow: none; 
-  font-size: .9rem; 
-}
-
-.status-badge { 
-  display: inline-block; 
-  padding: .2rem .6rem; 
-  border-radius: 12px; 
-  font-family: 'Cinzel Decorative', serif; 
-  font-size: .8rem; 
-  color: var(--text-primary); 
-  margin-top: .75rem; 
-}
+#noActiveQuestDisplay { text-align: center; padding: 2rem 1rem; border: 2px dashed var(--border-light); border-radius: 6px; }
+.hallOfConquests ul { list-style: none; padding: 0; margin: 0; }
+.hallOfConquests li { background: rgba(0, 0, 0, .1); padding: 10px; margin-bottom: 8px; border-radius: 4px; border-bottom: 1px solid var(--border-dark); color: var(--text-secondary); }
+.hallOfConquests li span { color: var(--text-primary); font-weight: 700; }
+.timeline { position: relative; padding: 2rem 0; margin-top: 1rem; }
+.timeline::before { content: ''; position: absolute; top: 0; left: 15px; height: 100%; width: 4px; background: var(--border-dark); border-radius: 2px; }
+.timeline-entry { position: relative; margin-bottom: 2.5rem; padding-left: 40px; }
+.timeline-entry::after { content: ''; position: absolute; left: 8px; top: 5px; width: 18px; height: 18px; border-radius: 50%; background: var(--accent-gold); border: 4px solid var(--border-dark); z-index: 1; }
+.timeline-card { background-color: var(--bg-light); border: 2px solid var(--border-dark); border-radius: 6px; padding: 1rem; position: relative; box-shadow: 0 5px 15px var(--shadow-deep); }
+.timeline-divider { text-align: center; margin: 2rem 0; }
+.timeline-divider span { font-family: 'Cinzel Decorative', serif; color: var(--text-secondary); font-size: 1.2rem; padding: 0 1rem; background-color: var(--bg-medium); }
+.timeline-filters { display: flex; justify-content: center; gap: .5rem; margin-bottom: 1rem; }
+.filter-btn { font-family: 'EB Garamond', serif; background-color: transparent; border: 2px solid var(--border-dark); color: var(--text-secondary); padding: .4rem 1rem; width: auto; box-shadow: none; font-size: .9rem; }
+.status-badge { display: inline-block; padding: .2rem .6rem; border-radius: 12px; font-family: 'Cinzel Decorative', serif; font-size: .8rem; color: var(--text-primary); margin-top: .75rem; }
 .status-conquered { background-color: var(--accent-green); }
 .status-abandoned { background-color: var(--accent-red); }
-
-/* --- Authentication --- */
-.user-auth-section { 
-  margin-left: auto; 
-  display: flex; 
-  align-items: center; 
-  gap: .5rem; 
-}
-
-.user-name { 
-  color: var(--accent-gold); 
-  text-transform: capitalize; 
-  font-size: clamp(0.8rem, 2.5vw, 1rem); 
-}
-
-.auth-form-overlay { 
-  position: fixed; 
-  inset: 0; 
-  background: rgba(0,0,0,.9); 
-  backdrop-filter: blur(6px); 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  z-index: 1000; 
-}
-
-.auth-form-content { 
-  width: 90%; 
-  max-width: 400px; 
-  padding: 30px; 
-  background-color: var(--bg-medium); 
-  border: 2px solid var(--border-dark); 
-  border-radius: 8px; 
-  text-align: center; 
-  outline: 1px solid var(--border-gold-dark); 
-  outline-offset: -5px; 
-  box-shadow: 0 0 20px var(--shadow-deep), inset 0 0 10px var(--shadow-deep); 
-}
-
-.auth-form-content h3 { 
-  font-family: 'Cinzel Decorative', serif; 
-  font-size: 2rem; 
-  margin-bottom: 20px; 
-  color: var(--accent-gold); 
-  text-transform: uppercase; 
-  text-shadow: 2px 2px 4px var(--shadow-deep); 
-}
-/* --- Clans Page --- */
-.clan-header {
-  position: relative;
-  text-align: center;
-  padding: 2rem 1rem;
-  background-color: var(--bg-deep);
-  border: 2px solid var(--border-dark);
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-}
-.clan-banner h2 {
-  font-family: 'Cinzel Decorative', serif;
-  font-size: clamp(2rem, 6vw, 3rem);
-  color: var(--accent-gold);
-  text-shadow: 0 0 10px var(--shadow-glow);
-  margin: 0 0 0.5rem;
-}
-.clan-banner p {
-  font-size: 1.1rem;
-  color: var(--text-secondary);
-  margin: 0;
-  font-style: italic;
-}
-#clanAdminBtn {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-}
-.clan-dashboard {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-@media (min-width: 768px) {
-    .clan-dashboard {
-        flex-direction: row;
-    }
-}
-.clan-dashboard-column {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-.clan-stats-panel {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    text-align: center;
-}
-.clan-stat h4 {
-    margin: 0 0 0.25rem;
-    font-size: 1rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-}
-.clan-stat p {
-    margin: 0;
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 2rem;
-    color: var(--text-primary);
-}
-.clan-roster, .clan-leaderboard-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-.clan-roster-item, .clan-leaderboard-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem;
-    background-color: var(--bg-medium);
-    border-radius: 4px;
-    border-left: 3px solid var(--border-dark);
-}
-.clan-leaderboard-item {
-    border-left-color: var(--accent-gold);
-}
-.roster-item-name, .leaderboard-item-name {
-    font-weight: 700;
-}
-.leader-badge, .kick-btn {
-    margin-left: 0.5rem;
-}
-.kick-btn {
-    background: none;
-    border: none;
-    color: var(--accent-red);
-    cursor: pointer;
-    font-size: 1.2rem;
-    padding: 0 0.5rem;
-    line-height: 1;
-    opacity: 0.7;
-    transition: opacity 0.2s;
-}
-.kick-btn:hover {
-    opacity: 1;
-}
-.roster-item-stats, .leaderboard-item-score {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-}
-.leave-clan-btn {
-    margin-top: 1.5rem;
-    width: 100%;
-    max-width: 400px;
-    align-self: center;
-}
+.auth-form-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.9); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.auth-form-content { width: 90%; max-width: 400px; padding: 30px; background-color: var(--bg-medium); border: 2px solid var(--border-dark); border-radius: 8px; text-align: center; outline: 1px solid var(--border-gold-dark); outline-offset: -5px; box-shadow: 0 0 20px var(--shadow-deep), inset 0 0 10px var(--shadow-deep); }
+.auth-form-content h3 { font-family: 'Cinzel Decorative', serif; font-size: 2rem; margin-bottom: 20px; color: var(--accent-gold); text-transform: uppercase; text-shadow: 2px 2px 4px var(--shadow-deep); }
+.clan-header { position: relative; text-align: center; padding: 2rem 1rem; background-color: var(--bg-deep); border: 2px solid var(--border-dark); border-radius: 8px; margin-bottom: 1.5rem; }
+.clan-banner h2 { font-family: 'Cinzel Decorative', serif; font-size: clamp(2rem, 6vw, 3rem); color: var(--accent-gold); text-shadow: 0 0 10px var(--shadow-glow); margin: 0 0 0.5rem; }
+.clan-banner p { font-size: 1.1rem; color: var(--text-secondary); margin: 0; font-style: italic; }
+#clanAdminBtn { position: absolute; top: 1rem; right: 1rem; }
+.clan-dashboard { display: flex; flex-direction: column; gap: 1.5rem; }
+.clan-dashboard-column { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; }
+.clan-stats-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: center; }
+.clan-stat h4 { margin: 0 0 0.25rem; font-size: 1rem; color: var(--text-secondary); text-transform: uppercase; }
+.clan-stat p { margin: 0; font-family: 'Cinzel Decorative', serif; font-size: 2rem; color: var(--text-primary); }
+.clan-roster, .clan-leaderboard-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+.clan-roster-item, .clan-leaderboard-item { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background-color: var(--bg-medium); border-radius: 4px; border-left: 3px solid var(--border-dark); }
+.clan-leaderboard-item { border-left-color: var(--accent-gold); }
+.roster-item-name, .leaderboard-item-name { font-weight: 700; }
+.leader-badge, .kick-btn { margin-left: 0.5rem; }
+.kick-btn { background: none; border: none; color: var(--accent-red); cursor: pointer; font-size: 1.2rem; padding: 0 0.5rem; line-height: 1; opacity: 0.7; transition: opacity 0.2s; }
+.kick-btn:hover { opacity: 1; }
+.roster-item-stats, .leaderboard-item-score { color: var(--text-secondary); font-size: 0.9rem; }
+.leave-clan-btn { margin-top: 1.5rem; width: 100%; max-width: 400px; align-self: center; }
 
 /* ==========================================================================
    UTILITIES & ANIMATIONS
    ========================================================================== */
-
-.hidden { 
-  display: none !important; 
-}
-
-/* For hiding labels visually while keeping them accessible to screen readers */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-@keyframes pulse-glow { 
-  0%, 100% { text-shadow: 0 0 6px var(--accent-gold); } 
-  50% { text-shadow: 0 0 14px var(--accent-gold); } 
-}
+.hidden { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
+@keyframes pulse-glow { 0%, 100% { text-shadow: 0 0 6px var(--accent-gold); } 50% { text-shadow: 0 0 14px var(--accent-gold); } }
 
 /* ==========================================================================
    MEDIA QUERIES
    ========================================================================== */
-
+@media (max-width: 850px) {
+    .hamburger-menu { display: flex; }
+    .nav-links-container { position: fixed; top: 0; left: 0; height: 100vh; width: 280px; background: var(--bg-medium); box-shadow: 4px 0 15px var(--shadow-deep); flex-direction: column; align-items: flex-start; justify-content: center; gap: 1rem; padding: 2rem; z-index: 999; transform: translateX(-100%); transition: transform 0.3s ease-in-out; }
+    body.menu-open .nav-links-container { transform: translateX(0); }
+    .nav-item { font-size: 1.2rem; padding: 0.5rem; width: 100%; text-align: left; }
+}
+@media (max-width: 400px) {
+  body { padding: 0.5rem; }
+  .ui-panel, .page-header, .game-container { padding-left: 0.75rem; padding-right: 0.75rem; }
+  header h1 { font-size: clamp(1.8rem, 8vw, 3.5rem); }
+  .auth-form-content { padding: 1.5rem; }
+}
 @media (min-width: 768px) {
-  body { 
-    padding: 2.5rem; 
-  }
-
-  .game-ui-layout { 
-    flex-direction: row; 
-    align-items: flex-start; 
-  }
-
-  .ui-panel { 
-    padding: 1.25rem; 
-  }
-
-  .boss-barb-image { 
-    width: 180px; 
-  }
-
-  .boss-barb-dialogue { 
-    font-size: 1.1rem; 
-  }
-
-  .section-header { 
-    font-size: 1.4rem; 
-  }
-
-  .nav-item { 
-    padding: 0.4rem 0.7rem; 
-    font-size: 0.9rem; 
-  }
-  
-  /* Desktop Timeline styles */
-  .timeline::before { 
-    left: 50%; 
-    margin-left: -2px; 
-  }
-
-  .timeline-entry { 
-    padding-left: 0; 
-    width: 50%; 
-  }
-
-  .timeline-entry:nth-child(odd) { 
-    left: 0; 
-    padding-right: 40px; 
-    text-align: right; 
-  }
-
-  .timeline-entry:nth-child(even) { 
-    left: 50%; 
-    padding-left: 40px; 
-    text-align: left; 
-  }
-
-  .timeline-entry:nth-child(odd)::after { 
-    left: auto; 
-    right: -9px; 
-  }
-  
-  .timeline-entry:nth-child(even)::after { 
-    left: -9px; 
-  }
+  body { padding: 2.5rem; }
+  .game-ui-layout { flex-direction: row; align-items: flex-start; }
+  .ui-panel { padding: 1.25rem; }
+  .boss-barb-image { width: 180px; }
+  .boss-barb-dialogue { font-size: 1.1rem; }
+  .section-header { font-size: 1.4rem; }
+  .nav-item { padding: 0.4rem 0.7rem; font-size: 0.9rem; }
+  .timeline::before { left: 50%; margin-left: -2px; }
+  .timeline-entry { padding-left: 0; width: 50%; }
+  .timeline-entry:nth-child(odd) { left: 0; padding-right: 40px; text-align: right; }
+  .timeline-entry:nth-child(even) { left: 50%; padding-left: 40px; text-align: left; }
+  .timeline-entry:nth-child(odd)::after { left: auto; right: -9px; }
+  .timeline-entry:nth-child(even)::after { left: -9px; }
+  .clan-dashboard { flex-direction: row; }
 }

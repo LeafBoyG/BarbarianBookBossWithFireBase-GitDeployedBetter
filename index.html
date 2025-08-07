@@ -48,21 +48,29 @@
 
 </head>
 <body>
-    <div class="game-container">
-        <nav class="top-nav">
-            <a href="#" id="readingLogNav" class="nav-item active">Reading Log</a>
-            <a href="#" id="attributesNav" class="nav-item">Attributes</a>
-            <a href="#" id="featsNav" class="nav-item">Feats</a>
-            <a href="#" id="statsNav" class="nav-item">Stats</a>
-            <a href="#" id="journeyNav" class="nav-item">Journey</a>
-            <a href="#" id="bountiesNav" class="nav-item">Bounties</a>
-            <a href="#" id="clansNav" class="nav-item">Clans</a>
-            
-            <div class="user-auth-section">
-                <span id="userName" class="user-name">Guest Warrior</span>
-                <button id="authBtn" class="auth-button">Sign Up / Log In</button>
-            </div>
-        </nav>
+ <div class="game-container">
+        <div id="menuOverlay" class="menu-overlay"></div> <nav class="top-nav">
+            <button class="hamburger-menu" id="hamburgerMenu" aria-label="Toggle Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+    <div class="nav-links-container" id="navLinksContainer">
+        <a href="#" id="readingLogNav" class="nav-item active">Reading Log</a>
+        <a href="#" id="attributesNav" class="nav-item">Attributes</a>
+        <a href="#" id="featsNav" class="nav-item">Feats</a>
+        <a href="#" id="statsNav" class="nav-item">Stats</a>
+        <a href="#" id="journeyNav" class="nav-item">Journey</a>
+        <a href="#" id="bountiesNav" class="nav-item">Bounties</a>
+        <a href="#" id="clansNav" class="nav-item">Clans</a>
+    </div>
+    
+    <div class="user-auth-section">
+        <span id="userName" class="user-name">Guest Warrior</span>
+        <button id="authBtn" class="auth-button">Sign Up / Log In</button>
+    </div>
+</nav>
 
         <header>
             <h1>Barbarian Book Boss</h1>
@@ -348,11 +356,11 @@
         </div>
     </div>
     
-    <audio id="soundClick" src="./assets/sounds/click.mp3" preload="auto"></audio>
-    <audio id="soundPageTurn" src="./assets/sounds/page-turn.mp3" preload="auto"></audio>
-    <audio id="soundQuestComplete" src="./assets/sounds/quest-complete.mp3" preload="auto"></audio>
-    <audio id="soundQuestStart" src="./assets/sounds/quest-start.mp3" preload="auto"></audio>
-    <audio id="soundError" src="./assets/sounds/error.mp3" preload="auto"></audio>
+    <audio id="soundClick" src="./assets/sounds/click.mp3" preload="metadata"></audio>
+    <audio id="soundPageTurn" src="./assets/sounds/page-turn.mp3" preload="metadata"></audio>
+    <audio id="soundQuestComplete" src="./assets/sounds/quest-complete.mp3" preload="metadata"></audio>
+    <audio id="soundQuestStart" src="./assets/sounds/quest-start.mp3" preload="metadata"></audio>
+    <audio id="soundError" src="./assets/sounds/error.mp3" preload="metadata"></audio>
     
     <script src="./script.js"></script>
     <script>
