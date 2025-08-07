@@ -1,139 +1,611 @@
 document.addEventListener('DOMContentLoaded', () => {
     'use strict';
-// --- BARB_ISMS & STATE ---
-const BARB_ISMS = {
-  "Grizzled Veteran": {
-    welcome: [
-      "Hmph. Another twig-arm. Ready for words or just to be food for worms?"
-    ],
-    book_completed: ["You crushed that book! Next!"],
-    general_encouragement: ["Good. Keep at it. Don't let your mind get soft."],
-    charmed_encouragement: [
-      "Your progress is... acceptable. Continue.",
-      "Hmph. Not bad. For a book-worm."
-    ],
-    saving_data: ["Recording your deeds..."],
-    quest_accepted: ["A new challenge! Do not fail me, whelp."],
-    quest_surrendered: ["You flee?! Cowards have no place in my war-band!"],
-    quest_undone: ["Hah! The tome returns from the grave!"],
-    error_undo: ["Finish your current battle before starting another!"],
-    error_page_count: ["YOU CANNOT READ MORE PAGES THAN EXIST, FOOL!"],
-    error: ["Fool! Not like that!"],
-    auth_errors: {
-      "auth/invalid-email": "EMAIL BAD! NOT A REAL EMAIL, FOOL!",
-      "auth/user-not-found": "NO WARRIOR WITH THAT EMAIL! SIGN UP, MAYBE?",
-      "auth/wrong-password": "PASSWORD WRONG! TRY AGAIN, OR BRAIN SMASH!",
-      "auth/email-already-in-use": "EMAIL TAKEN! ANOTHER WARRIOR GOT IT! USE ANOTHER!",
-      "auth/weak-password": "PASSWORD WEAK! NEED 6+ CHARACTERS! BE STRONGER!",
-      "default": "AUTH FAILED!"
-    }
-  }
-};
 
-    // --- CONSTANTS ---
+    const enums = {
+        views: { LOG: 'log', STATS: 'stats', JOURNEY: 'journey', ATTRIBUTES: 'attributes', FEATS: 'feats', BOUNTIES: 'bounties', CLANS: 'clans' },
+        attributes: { STRENGTH: 'strength', INTELLECT: 'intellect', WISDOM: 'wisdom', CHARISMA: 'charisma' },
+        questStatus: { ACTIVE: 'active', CONQUERED: 'conquered', ABANDONED: 'abandoned' }
+    };
+
+    const BARB_ISMS = {
+        "Grizzled Veteran": {
+            welcome: ["Hmph. Another twig-arm. Ready for words or just to be food for worms?"],
+            book_completed: ["You crushed that book! Next!"],
+            general_encouragement: ["Good. Keep at it. Don't let your mind get soft."],
+            charmed_encouragement: ["Your progress is... acceptable. Continue.", "Hmph. Not bad. For a book-worm."],
+            saving_data: ["Recording your deeds..."],
+            quest_accepted: ["A new challenge! Do not fail me, whelp."],
+            quest_surrendered: ["You flee?! Cowards have no place in my war-band!"],
+            quest_undone: ["Hah! The tome returns from the grave!"],
+            error_undo: ["Finish your current battle before starting another!"],
+            error_page_count: ["YOU CANNOT READ MORE PAGES THAN EXIST, FOOL!"],
+            error: ["Fool! Not like that!"],
+            auth_errors: {
+                "auth/invalid-email": "EMAIL BAD! NOT A REAL EMAIL, FOOL!",
+                "auth/user-not-found": "NO WARRIOR WITH THAT EMAIL! SIGN UP, MAYBE?",
+                "auth/wrong-password": "PASSWORD WRONG! TRY AGAIN, OR BRAIN SMASH!",
+                "auth/email-already-in-use": "EMAIL TAKEN! ANOTHER WARRIOR GOT IT! USE ANOTHER!",
+                "auth/weak-password": "PASSWORD WEAK! NEED 6+ CHARACTERS! BE STRONGER!",
+                "default": "AUTH FAILED!"
+            }
+        }
+    };
     const BARB_IMAGE_PATH = 'assets/Barbs/';
     const FEATS_LIST = { page_pounder: { name: "Page Pounder", description: "Read 50 pages in a single day." }, saga_smasher: { name: "Saga Smasher", description: "Conquer 3 books." }, epic_explorer: { name: "Epic Explorer", description: "Conquer a book over 500 pages long." }, librarians_bane: { name: "Librarian's Bane", description: "Conquer 10 books." }, genre_master_fantasy: { name: "Fantasy Realm Master", description: "Conquer 5 fantasy books." }, genre_master_scifi: { name: "Starship Captain", description: "Conquer 5 Science Fiction books." } };
     const PERKS_LIST = {
-        strength: { '5': [ { id: 'str_perk_5a', name: 'Tome Hauler', description: 'Gain a permanent 5% bonus to all Strength XP earned from reading pages.' }, { id: 'str_perk_5b', name: 'Finishing Blow', description: 'Gain a flat +50 bonus to Strength XP each time you conquer a book.' } ], '10': [ { id: 'str_perk_10a', name: 'Warrior\'s Stamina', description: 'The first 25 pages you read each day grant 1.5x Strength XP.' }, { id: 'str_perk_10b', name: 'Unstoppable Force', description: 'Gain 10 bonus Strength XP for each day of your current reading streak.' } ], '15': [ { id: 'str_perk_15a', name: 'Literary Crusher', description: 'Gain a permanent +10% to Strength XP from all sources.' }, { id: 'str_perk_15b', name: 'Epic Strength', description: 'Double the Strength XP gained from conquering books over 500 pages.' } ], '20': [ { id: 'str_perk_20a', name: 'Master of the Grind', description: 'The bonus from the "Tome Hauler" perk is doubled to 10%.' }, { id: 'str_perk_20b', name: 'Unending Power', description: 'Reading streaks no longer reset; they only pause after 3 days of inactivity.' } ] },
-        intellect: { '5': [ { id: 'int_perk_5a', name: 'Polymath', description: 'Gain a 10% bonus to the flat XP reward for conquering a book in a new genre.' }, { id: 'int_perk_5b', name: 'Quick Study', description: 'The first 10 pages you read each day grant double Strength XP.' } ], '10': [ { id: 'int_perk_10a', name: 'Librarian\'s Scorn', description: 'Gain a flat +150 Intellect XP for conquering any Non-Fiction book.' }, { id: 'int_perk_10b', name: 'Genre Dabbler', description: 'Gain a flat +100 Intellect XP for every 3 unique genres you conquer.' } ], '15': [ { id: 'int_perk_15a', name: 'Scholarly Pursuit', description: 'The XP bonus from the "Polymath" perk is doubled to 20%.' }, { id: 'int_perk_15b', name: 'Deep Thinker', description: 'Unlocking any Feat now also grants a bonus of 300 Intellect XP.' } ], '20': [ { id: 'int_perk_20a', name: 'Master Linguist', description: 'Gain a permanent +10% to Intellect XP from all sources.' }, { id: 'int_perk_20b', name: 'Encyclopedic Knowledge', description: 'The flat XP bonus for conquering a book in a new genre is permanently tripled.' } ] },
-        wisdom: { '5': [ { id: 'wis_perk_5a', name: 'Sage Advice', description: 'Gain a 10% bonus to Wisdom XP when conquering epic tomes (500+ pages).' }, { id: 'wis_perk_5b', name: 'Patient Scholar', description: 'Gain 25 bonus Wisdom XP on any day you read at least one page.' } ], '10': [ { id: 'wis_perk_10a', name: 'Meditative Reading', description: 'Gain a small amount of Wisdom XP for every day you maintain a reading streak.' }, { id: 'wis_perk_10b', name: 'Focused Mind', description: 'If you only log pages for a single book for 7 consecutive days, gain a +500 Wisdom XP bonus.' } ], '15': [ { id: 'wis_perk_15a', name: 'Ancient Knowledge', description: 'The bonus XP from the "Sage Advice" perk is doubled to 20%.' }, { id: 'wis_perk_15b', name: 'Marathon Runner', description: 'Conquering any book over 1000 pages instantly grants one free Perk Point.' } ], '20': [ { id: 'wis_perk_20a', name: 'Oracle', description: 'Gain a permanent +10% to Wisdom XP from all sources.' }, { id: 'wis_perk_20b', name: 'Timeless Wisdom', description: 'The daily Wisdom XP bonus from "Patient Scholar" is tripled.' } ] },
-        charisma: { '5': [ { id: 'cha_perk_1a', name: 'Silver Tongue', description: 'The Barbarian is permanently charmed and will always use his more encouraging dialogue.' }, { id: 'cha_perk_1b', name: 'Inspiring Tales', description: 'Gain +50 bonus Charisma XP when you conquer a book from the Fantasy or Romance genres.' } ], '10': [ { id: 'cha_perk_10a', name: 'Bardic Knowledge', description: 'Gain a small amount of Charisma XP when you unlock any Feat.' }, { id: 'cha_perk_10b', name: 'Gift of Gab', description: 'The Barbarian\'s dialogue when you spend a Perk Point is unique and highly congratulatory.' } ], '15': [ { id: 'cha_perk_15a', name: 'Beloved Leader', description: 'The bonus XP from the "Inspiring Tales" perk is doubled.' }, { id: 'cha_perk_15b', name: 'Diplomat', description: 'Gain a flat +200 Charisma XP for conquering a book from the "Non-Fiction" or "History" genres.' } ], '20': [ { id: 'cha_perk_20a', name: 'Legendary Presence', description: 'Gain a permanent +10% to Charisma XP from all sources.' }, { id: 'cha_perk_20b', name: 'Ultimate Charm', description: 'The "Silver Tongue" perk now gives a 5% chance for the Barbarian to grant you a bonus Perk Point when any attribute levels up.' } ] }
+        strength: [
+            { id: 'str_perk_5a', name: 'Tome Hauler', description: 'Gain a permanent 5% bonus to all Strength XP earned from reading pages.', requiredLevel: 5 }, { id: 'str_perk_5b', name: 'Finishing Blow', description: 'Gain a flat +50 bonus to Strength XP each time you conquer a book.', requiredLevel: 5 }, { id: 'str_perk_10a', name: 'Warrior\'s Stamina', description: 'The first 25 pages you read each day grant 1.5x Strength XP.', requiredLevel: 10 }, { id: 'str_perk_10b', name: 'Unstoppable Force', description: 'Gain 10 bonus Strength XP for each day of your current reading streak.', requiredLevel: 10 }, { id: 'str_perk_15a', name: 'Literary Crusher', description: 'Gain a permanent +10% to Strength XP from all sources.', requiredLevel: 15 }, { id: 'str_perk_15b', name: 'Epic Strength', description: 'Double the Strength XP gained from conquering books over 500 pages.', requiredLevel: 15 }, { id: 'str_perk_20a', name: 'Master of the Grind', description: 'The bonus from the "Tome Hauler" perk is doubled to 10%.', requiredLevel: 20 }, { id: 'str_perk_20b', name: 'Unending Power', description: 'Reading streaks no longer reset; they only pause after 3 days of inactivity.', requiredLevel: 20 }
+        ],
+        intellect: [
+            { id: 'int_perk_5a', name: 'Polymath', description: 'Gain a 10% bonus to the flat XP reward for conquering a book in a new genre.', requiredLevel: 5 }, { id: 'int_perk_5b', name: 'Quick Study', description: 'The first 10 pages you read each day grant double Strength XP.', requiredLevel: 5 }, { id: 'int_perk_10a', name: 'Librarian\'s Scorn', description: 'Gain a flat +150 Intellect XP for conquering any Non-Fiction book.', requiredLevel: 10 }, { id: 'int_perk_10b', name: 'Genre Dabbler', description: 'Gain a flat +100 Intellect XP for every 3 unique genres you conquer.', requiredLevel: 10 }, { id: 'int_perk_15a', name: 'Scholarly Pursuit', description: 'The XP bonus from the "Polymath" perk is doubled to 20%.', requiredLevel: 15 }, { id: 'int_perk_15b', name: 'Deep Thinker', description: 'Unlocking any Feat now also grants a bonus of 300 Intellect XP.', requiredLevel: 15 }, { id: 'int_perk_20a', name: 'Master Linguist', description: 'Gain a permanent +10% to Intellect XP from all sources.', requiredLevel: 20 }, { id: 'int_perk_20b', name: 'Encyclopedic Knowledge', description: 'The flat XP bonus for conquering a book in a new genre is permanently tripled.', requiredLevel: 20 }
+        ],
+        wisdom: [
+            { id: 'wis_perk_5a', name: 'Sage Advice', description: 'Gain a 10% bonus to Wisdom XP when conquering epic tomes (500+ pages).', requiredLevel: 5 }, { id: 'wis_perk_5b', name: 'Patient Scholar', description: 'Gain 25 bonus Wisdom XP on any day you read at least one page.', requiredLevel: 5 }, { id: 'wis_perk_10a', name: 'Meditative Reading', description: 'Gain a small amount of Wisdom XP for every day you maintain a reading streak.', requiredLevel: 10 }, { id: 'wis_perk_10b', name: 'Focused Mind', description: 'If you only log pages for a single book for 7 consecutive days, gain a +500 Wisdom XP bonus.', requiredLevel: 10 }, { id: 'wis_perk_15a', name: 'Ancient Knowledge', description: 'The bonus XP from the "Sage Advice" perk is doubled to 20%.', requiredLevel: 15 }, { id: 'wis_perk_15b', name: 'Marathon Runner', description: 'Conquering any book over 1000 pages instantly grants one free Perk Point.', requiredLevel: 15 }, { id: 'wis_perk_20a', name: 'Oracle', description: 'Gain a permanent +10% to Wisdom XP from all sources.', requiredLevel: 20 }, { id: 'wis_perk_20b', name: 'Timeless Wisdom', description: 'The daily Wisdom XP bonus from "Patient Scholar" is tripled.', requiredLevel: 20 }
+        ],
+        charisma: [
+            { id: 'cha_perk_1a', name: 'Silver Tongue', description: 'The Barbarian is permanently charmed and will always use his more encouraging dialogue.', requiredLevel: 5 }, { id: 'cha_perk_1b', name: 'Inspiring Tales', description: 'Gain +50 bonus Charisma XP when you conquer a book from the Fantasy or Romance genres.', requiredLevel: 5 }, { id: 'cha_perk_10a', name: 'Bardic Knowledge', description: 'Gain a small amount of Charisma XP when you unlock any Feat.', requiredLevel: 10 }, { id: 'cha_perk_10b', name: 'Gift of Gab', description: 'The Barbarian\'s dialogue when you spend a Perk Point is unique and highly congratulatory.', requiredLevel: 10 }, { id: 'cha_perk_15a', name: 'Beloved Leader', description: 'The bonus XP from the "Inspiring Tales" perk is doubled.', requiredLevel: 15 }, { id: 'cha_perk_15b', name: 'Diplomat', description: 'Gain a flat +200 Charisma XP for conquering a book from the "Non-Fiction" or "History" genres.', requiredLevel: 15 }, { id: 'cha_perk_20a', name: 'Legendary Presence', description: 'Gain a permanent +10% to Charisma XP from all sources.', requiredLevel: 20 }, { id: 'cha_perk_20b', name: 'Ultimate Charm', description: 'The "Silver Tongue" perk now gives a 5% chance for the Barbarian to grant you a bonus Perk Point when any attribute levels up.', requiredLevel: 20 }
+        ]
     };
     const BOUNTY_LIST = { weekly_pages: { id: 'weekly_pages', title: 'Weekly Page-Slayer', description: 'Read 500 pages within 7 days.', target: 500, reward: 750, type: 'pages' }, monthly_conqueror: { id: 'monthly_conqueror', title: 'Monthly Conqueror', description: 'Conquer 4 books in a single month.', target: 4, reward: 1500, type: 'books' } };
 
-    // --- UI ELEMENT REFERENCES ---
-    const mainView = document.querySelector('.game-ui-layout'); const statsView = document.getElementById('statsPage'); const journeyView = document.getElementById('journeyPage'); const attributesView = document.getElementById('attributesPage'); const featsView = document.getElementById('featsPage'); const bountiesView = document.getElementById('bountiesPage'); const clansView = document.getElementById('clansPage'); const readingLogNav = document.getElementById('readingLogNav'); const attributesNav = document.getElementById('attributesNav'); const featsNav = document.getElementById('featsNav'); const statsNav = document.getElementById('statsNav'); const journeyNav = document.getElementById('journeyNav'); const bountiesNav = document.getElementById('bountiesNav'); const clansNav = document.getElementById('clansNav'); const noClanView = document.getElementById('noClanView'); const clanMemberView = document.getElementById('clanMemberView'); const clanNameInput = document.getElementById('clanNameInput'); const createClanBtn = document.getElementById('createClanBtn'); const clanHallHeader = document.getElementById('clanHallHeader'); const clanList = document.getElementById('clanList'); const leaveClanBtn = document.getElementById('leaveClanBtn'); const bountiesGrid = document.getElementById('bountiesGrid'); const perkPointsDisplay = document.getElementById('perkPointsDisplay'); const attrStrengthLevel = document.getElementById('attrStrengthLevel'); const attrStrengthXpFill = document.getElementById('attrStrengthXpFill'); const attrStrengthXpText = document.getElementById('attrStrengthXpText'); const attrIntellectLevel = document.getElementById('attrIntellectLevel'); const attrIntellectXpFill = document.getElementById('attrIntellectXpFill'); const attrIntellectXpText = document.getElementById('attrIntellectXpText'); const attrWisdomLevel = document.getElementById('attrWisdomLevel'); const attrWisdomXpFill = document.getElementById('attrWisdomXpFill'); const attrWisdomXpText = document.getElementById('attrWisdomXpText'); const attrCharismaLevel = document.getElementById('attrCharismaLevel'); const attrCharismaXpFill = document.getElementById('attrCharismaXpFill'); const attrCharismaXpText = document.getElementById('attrCharismaXpText'); const perksSection = document.getElementById('perksSection'); const strengthPerksContainer = document.getElementById('strengthPerksContainer'); const intellectPerksContainer = document.getElementById('intellectPerksContainer'); const wisdomPerksContainer = document.getElementById('wisdomPerksContainer'); const charismaPerksContainer = document.getElementById('charismaPerksContainer'); const editQuestBtn = document.getElementById('editQuestBtn'); const editQuestModal = document.getElementById('editQuestModal'); const editBookTitleInput = document.getElementById('editBookTitleInput'); const editBookAuthorInput = document.getElementById('editBookAuthorInput'); const editBookGenreSelect = document.getElementById('editBookGenreSelect'); const editCustomGenreInput = document.getElementById('editCustomGenreInput'); const editBookTotalPagesInput = document.getElementById('editBookTotalPagesInput'); const saveQuestChangesBtn = document.getElementById('saveQuestChangesBtn'); const cancelEditQuestBtn = document.getElementById('cancelEditQuestBtn'); const featsGrid = document.getElementById('featsGrid'); const timelineContainer = document.getElementById('timelineContainer'); const timelineFilters = document.querySelector('.timeline-filters'); const statsTotalBooks = document.getElementById('statsTotalBooks'); const statsTotalPages = document.getElementById('statsTotalPages'); const statsMightiestBook = document.getElementById('statsMightiestBook'); const statsMightiestBookPages = document.getElementById('statsMightiestBookPages'); const statsFavGenre = document.getElementById('statsFavGenre'); const bossBarbImage = document.getElementById('bossBarbImage'); const bossBarbDialogue = document.getElementById('bossBarbDialogue').querySelector('.dialogue-text'); const playerLevelSpan = document.getElementById('playerLevel'); const xpBarFill = document.getElementById('xpBarFill'); const activeQuestDisplay = document.getElementById('activeQuestDisplay'); const noActiveQuestDisplay = document.getElementById('noActiveQuestDisplay'); const newQuestForm = document.getElementById('newQuestForm'); const bookTitleInput = document.getElementById('bookTitleInput'); const bookAuthorInput = document.getElementById('bookAuthorInput'); const bookGenreSelect = document.getElementById('bookGenreSelect'); const customGenreInput = document.getElementById('customGenreInput'); const bookTotalPagesInput = document.getElementById('bookTotalPagesInput'); const startNewQuestBtn = document.getElementById('startNewQuestBtn'); const addBookBtn = document.getElementById('addBookBtn'); const cancelAddBookBtn = document.getElementById('cancelAddBookBtn'); const completedBooksList = document.getElementById('completedBooksList'); const userNameSpan = document.getElementById('userName'); const authBtn = document.getElementById('authBtn'); const authForm = document.getElementById('authForm'); const authEmailInput = document.getElementById('authEmail'); const authUsernameInput = document.getElementById('authUsername'); const authPasswordInput = document.getElementById('authPassword'); const loginBtn = document.getElementById('loginBtn'); const signupBtn = document.getElementById('signupBtn'); const cancelAuthBtn = document.getElementById('cancelAuthBtn'); const authErrorMessage = document.getElementById('authErrorMessage'); const soundClick = document.getElementById('soundClick'); const soundPageTurn = document.getElementById('soundPageTurn'); const soundQuestComplete = document.getElementById('soundQuestComplete'); const soundQuestStart = document.getElementById('soundQuestStart'); const soundError = document.getElementById('soundError');
+    const UI = {
+        mainView: document.querySelector('.game-ui-layout'),
+        statsView: document.getElementById('statsPage'),
+        journeyView: document.getElementById('journeyPage'),
+        attributesView: document.getElementById('attributesPage'),
+        featsView: document.getElementById('featsPage'),
+        bountiesView: document.getElementById('bountiesPage'),
+        clansView: document.getElementById('clansPage'),
+        nav: { readingLog: document.getElementById('readingLogNav'), attributes: document.getElementById('attributesNav'), feats: document.getElementById('featsNav'), stats: document.getElementById('statsNav'), journey: document.getElementById('journeyNav'), bounties: document.getElementById('bountiesNav'), clans: document.getElementById('clansNav'), },
+        clans: { noClanView: document.getElementById('noClanView'), memberView: document.getElementById('clanMemberView'), nameInput: document.getElementById('clanNameInput'), createBtn: document.getElementById('createClanBtn'), hallHeader: document.getElementById('clanHallHeader'), list: document.getElementById('clanList'), memberList: document.getElementById('clanMemberList'), leaveBtn: document.getElementById('leaveClanBtn'), },
+        bounties: { grid: document.getElementById('bountiesGrid'), },
+        attributes: { perkPointsDisplay: document.getElementById('perkPointsDisplay'), perksSection: document.getElementById('perksSection'), strength: { level: document.getElementById('attrStrengthLevel'), xpFill: document.getElementById('attrStrengthXpFill'), xpText: document.getElementById('attrStrengthXpText'), perksContainer: document.getElementById('strengthPerksContainer') }, intellect: { level: document.getElementById('attrIntellectLevel'), xpFill: document.getElementById('attrIntellectXpFill'), xpText: document.getElementById('attrIntellectXpText'), perksContainer: document.getElementById('intellectPerksContainer') }, wisdom: { level: document.getElementById('attrWisdomLevel'), xpFill: document.getElementById('attrWisdomXpFill'), xpText: document.getElementById('attrWisdomXpText'), perksContainer: document.getElementById('wisdomPerksContainer') }, charisma: { level: document.getElementById('attrCharismaLevel'), xpFill: document.getElementById('attrCharismaXpFill'), xpText: document.getElementById('attrCharismaXpText'), perksContainer: document.getElementById('charismaPerksContainer') }, },
+        editQuest: { btn: document.getElementById('editQuestBtn'), modal: document.getElementById('editQuestModal'), titleInput: document.getElementById('editBookTitleInput'), authorInput: document.getElementById('editBookAuthorInput'), genreSelect: document.getElementById('editBookGenreSelect'), customGenreInput: document.getElementById('editCustomGenreInput'), totalPagesInput: document.getElementById('editBookTotalPagesInput'), saveBtn: document.getElementById('saveQuestChangesBtn'), cancelBtn: document.getElementById('cancelEditQuestBtn'), },
+        feats: { grid: document.getElementById('featsGrid'), },
+        journey: { container: document.getElementById('timelineContainer'), filters: document.querySelector('.timeline-filters'), },
+        stats: { totalBooks: document.getElementById('statsTotalBooks'), totalPages: document.getElementById('statsTotalPages'), mightiestBook: document.getElementById('statsMightiestBook'), mightiestBookPages: document.getElementById('statsMightiestBookPages'), favGenre: document.getElementById('statsFavGenre'), },
+        barb: { image: document.getElementById('bossBarbImage'), dialogue: document.getElementById('bossBarbDialogue').querySelector('.dialogue-text'), },
+        player: { level: document.getElementById('playerLevel'), xpBarFill: document.getElementById('xpBarFill'), },
+        activeQuest: { display: document.getElementById('activeQuestDisplay'), title: document.getElementById('activeBookTitle'), author: document.getElementById('activeBookAuthor'), progressBar: document.getElementById('questProgressBar'), progressText: document.getElementById('questProgressText'), pagesReadInput: document.getElementById('pagesReadInput'), logPagesBtn: document.getElementById('logPagesBtn'), conquerBtn: document.getElementById('conquerBookBtn'), surrenderBtn: document.getElementById('surrenderQuestBtn'), },
+        newQuest: { display: document.getElementById('noActiveQuestDisplay'), form: document.getElementById('newQuestForm'), creatorSection: document.getElementById('quest-creator-section'), titleInput: document.getElementById('bookTitleInput'), authorInput: document.getElementById('bookAuthorInput'), genreSelect: document.getElementById('bookGenreSelect'), customGenreInput: document.getElementById('customGenreInput'), totalPagesInput: document.getElementById('bookTotalPagesInput'), startBtn: document.getElementById('startNewQuestBtn'), addBtn: document.getElementById('addBookBtn'), cancelBtn: document.getElementById('cancelAddBookBtn'), },
+        completed: { list: document.getElementById('completedBooksList'), },
+        auth: { userName: document.getElementById('userName'), btn: document.getElementById('authBtn'), form: document.getElementById('authForm'), emailInput: document.getElementById('authEmail'), usernameInput: document.getElementById('authUsername'), passwordInput: document.getElementById('authPassword'), loginBtn: document.getElementById('loginBtn'), signupBtn: document.getElementById('signupBtn'), cancelBtn: document.getElementById('cancelAuthBtn'), errorMessage: document.getElementById('authErrorMessage'), },
+        sounds: { click: document.getElementById('soundClick'), pageTurn: document.getElementById('soundPageTurn'), questComplete: document.getElementById('soundQuestComplete'), questStart: document.getElementById('soundQuestStart'), error: document.getElementById('soundError'), }
+    };
     
-    // --- BARB_ISMS & STATE ---
     let userData = {};
     let currentUser = null;
     let idleTimeout;
     let currentJourneyFilter = 'all';
     const defaultUserData = { perkPoints: 0, unlockedPerks: [], activeQuest: null, completedQuests: [], archivedQuests: [], feats: {}, pagesReadToday: 0, attributes: { strength: { level: 1, xp: 0 }, intellect: { level: 1, xp: 0 }, wisdom: { level: 1, xp: 0 }, charisma: { level: 1, xp: 0 } }, conqueredGenres: [], bounties: {}, clanId: null, clanName: null, lastLoginDate: new Date().toDateString() };
 
-    // --- UTILITIES & CORE FUNCTIONS ---
     const randomChoice = (arr) => arr[Math.floor(Math.random() * arr.length)];
-    function playSound(soundElement) { if (soundElement) { soundElement.currentTime = 0; soundElement.play().catch(e => console.error("Sound playback failed:", e)); } }
-   function updateBarbarian(state, message = null) {
-  clearTimeout(idleTimeout);
+    const playSound = (soundElement) => { if (soundElement) { soundElement.currentTime = 0; soundElement.play().catch(e => console.error("Sound playback failed:", e)); } }
 
-  const imageMap = {
-    'pleased': 'NormalBarb.webp',
-    'angry': 'AngryBarb.webp',
-    'celebrate': 'CelebratingBarb.webp',
-    'idle': 'NormalBarb.webp'
-  };
-
-  const imageName = imageMap[state] || 'NormalBarb.webp';
-  bossBarbImage.src = BARB_IMAGE_PATH + imageName;
-
-  if (message) {
-    bossBarbDialogue.innerHTML = message.replace(/\n/g, '<br>');
-  }
-
-  if (state !== 'idle') {
-    idleTimeout = setTimeout(() => {
-      bossBarbImage.src = BARB_IMAGE_PATH + 'NormalBarb.webp';
-    }, 5000);
-  }
-}
+    function updateBarbarian(state, message = null) {
+        clearTimeout(idleTimeout);
+        const imageMap = { 'pleased': 'NormalBarb.webp', 'angry': 'AngryBarb.webp', 'celebrate': 'CelebratingBarb.webp', 'idle': 'NormalBarb.webp' };
+        UI.barb.image.src = BARB_IMAGE_PATH + (imageMap[state] || 'NormalBarb.webp');
+        if (message) { UI.barb.dialogue.innerHTML = message.replace(/\n/g, '<br>'); }
+        if (state !== 'idle') { idleTimeout = setTimeout(() => { UI.barb.image.src = BARB_IMAGE_PATH + 'NormalBarb.webp'; }, 5000); }
+    }
 
     const getXpForNextLevel = (currentLevel) => Math.floor(100 * Math.pow(currentLevel, 1.5));
-    const getOverallLevel = (userObject = userData) => { if (!userObject.attributes) return 1; const { strength, intellect, wisdom, charisma } = userObject.attributes; return Math.floor((strength.level + intellect.level + wisdom.level + charisma.level) / 4); }
-
-    // --- VIEW SWITCHING ---
-    function switchView(viewToShow) { playSound(soundClick); mainView.classList.add('hidden'); statsView.classList.add('hidden'); journeyView.classList.add('hidden'); attributesView.classList.add('hidden'); featsView.classList.add('hidden'); bountiesView.classList.add('hidden'); clansView.classList.add('hidden'); readingLogNav.classList.remove('active'); statsNav.classList.remove('active'); journeyNav.classList.remove('active'); attributesNav.classList.remove('active'); featsNav.classList.remove('active'); bountiesNav.classList.remove('active'); clansNav.classList.remove('active'); if (viewToShow === 'stats') { statsView.classList.remove('hidden'); statsNav.classList.add('active'); renderStatsPage(); } else if (viewToShow === 'journey') { journeyView.classList.remove('hidden'); journeyNav.classList.add('active'); renderJourneyPage(); } else if (viewToShow === 'attributes') { attributesView.classList.remove('hidden'); attributesNav.classList.add('active'); renderAttributesPage(); } else if (viewToShow === 'feats') { featsView.classList.remove('hidden'); featsNav.classList.add('active'); renderFeatsPage(); } else if (viewToShow === 'bounties') { bountiesView.classList.remove('hidden'); bountiesNav.classList.add('active'); renderBountiesPage(); } else if (viewToShow === 'clans') { clansView.classList.remove('hidden'); clansNav.classList.add('active'); renderClansPage(); } else { mainView.classList.remove('hidden'); readingLogNav.classList.add('active'); } }
-
-    // --- PAGE RENDERING ---
-    async function renderClansPage() { if (!userData) return; if (userData.clanId) { noClanView.classList.add('hidden'); clanMemberView.classList.remove('hidden'); try { const clanDoc = await db.collection('clans').doc(userData.clanId).get(); if(clanDoc.exists) { const clanData = clanDoc.data(); clanHallHeader.innerHTML = `<h2>${clanData.name}</h2>`; const memberIds = clanData.memberIds; if (!memberIds || memberIds.length === 0) { clanMemberList.innerHTML = '<li>This clan has no members.</li>'; return; } const memberPromises = memberIds.map(id => db.collection('users').doc(id).get()); const memberDocs = await Promise.all(memberPromises); clanMemberList.innerHTML = ''; memberDocs.forEach(memberDoc => { if (memberDoc.exists) { const memberData = memberDoc.data(); const li = document.createElement('li'); li.classList.add('clan-member-item'); const isLeader = memberDoc.id === clanData.leaderId; li.innerHTML = `<div class="clan-member-info"><div class="name">${memberData.displayName || memberDoc.id.substring(0,8)} ${isLeader ? '<span class="leader-badge">★ Leader</span>' : ''}</div><div class="level">Overall Level: ${getOverallLevel(memberData)}</div></div>`; clanMemberList.appendChild(li); } }); } else { console.error("Clan not found, data might be out of sync."); handleLeaveClan(false); } } catch(error){ console.error("Error fetching clan details:", error); clanHallHeader.innerHTML = `<h2>Error Loading Clan</h2>`; } } else { noClanView.classList.remove('hidden'); clanMemberView.classList.add('hidden'); try { const clansSnapshot = await db.collection('clans').orderBy('name').limit(20).get(); clanList.innerHTML = ''; if (clansSnapshot.empty) { clanList.innerHTML = '<li class="clan-list-item-placeholder">No war-bands have been founded yet. Be the first!</li>'; } else { clansSnapshot.forEach(doc => { const clan = doc.data(); const li = document.createElement('li'); li.classList.add('clan-list-item'); li.innerHTML = `<div class="clan-info"><div class="name">${clan.name}</div><div class="members">${clan.memberIds.length} member(s)</div></div><button class="join-btn" data-clan-id="${doc.id}" data-clan-name="${clan.name}">Join</button>`; clanList.appendChild(li); }); } } catch (error) { console.error("Error fetching clans:", error); clanList.innerHTML = '<li class="clan-list-item-placeholder">Could not retrieve list of clans.</li>'; } } }
-    function renderBountiesPage() { if (!userData) return; bountiesGrid.innerHTML = ''; for (const bountyId in BOUNTY_LIST) { const bountyDef = BOUNTY_LIST[bountyId]; const activeBounty = userData.bounties[bountyId]; const card = document.createElement('div'); card.classList.add('bounty-card'); let content = `<h3>${bountyDef.title}</h3><p>${bountyDef.description}</p>`; if (activeBounty) { card.classList.add('in-progress'); const progress = activeBounty.progress || 0; const percentage = (progress / bountyDef.target) * 100; content += `<div class="progress-bar-container"><div class="progress-bar"><div class="progress-bar-fill" style="width: ${percentage}%;"></div></div><div class="progress-bar-text">${progress} / ${bountyDef.target}</div></div><div class="bounty-reward">Reward: ${bountyDef.reward} XP</div>`; } else { content += `<div class="bounty-reward">Reward: ${bountyDef.reward} XP</div><button class="accept-bounty-btn" data-bounty-id="${bountyId}">Accept Bounty</button>`; } card.innerHTML = content; bountiesGrid.appendChild(card); } }
-    function renderStatsPage() { if (!userData || !userData.completedQuests) return; const stats = calculateStats(); statsTotalBooks.textContent = stats.totalBooks; statsTotalPages.textContent = stats.totalPages.toLocaleString(); statsMightiestBook.textContent = stats.mightiestBook; statsMightiestBookPages.textContent = stats.mightiestBookPages > 0 ? `${stats.mightiestBookPages.toLocaleString()} pages` : ''; statsFavGenre.textContent = stats.favGenre; statsFavGenre.style.textTransform = 'capitalize'; }
-    function renderJourneyPage() { if (!userData) return; const completed = userData.completedQuests || []; const archived = userData.archivedQuests || []; const allEvents = [...completed, ...archived]; const filteredEvents = allEvents.filter(quest => { if (currentJourneyFilter === 'all') return true; return quest.status === currentJourneyFilter; }); if (filteredEvents.length === 0) { timelineContainer.innerHTML = `<p style="text-align: center; color: var(--text-secondary);">No entries found for this filter.</p>`; return; } const parseDate = (quest) => { const dateString = quest.dateConquered || quest.dateAbandoned; if (!dateString) return new Date(0); const [day, month, year] = dateString.split('/'); return new Date(`${year}-${month}-${day}`); }; filteredEvents.sort((a, b) => parseDate(b) - parseDate(a)); let lastMonth = null; timelineContainer.innerHTML = filteredEvents.reduce((html, quest) => { const eventDate = parseDate(quest); const eventMonth = eventDate.toLocaleString('default', { month: 'long', year: 'numeric' }); if (eventMonth !== lastMonth) { html += `<div class="timeline-divider"><span>— ${eventMonth} —</span></div>`; lastMonth = eventMonth; } const isConquered = quest.status === 'conquered'; const statusClass = isConquered ? 'status-conquered' : 'status-abandoned'; const statusText = isConquered ? 'Conquered' : 'Abandoned'; const date = quest.dateConquered || quest.dateAbandoned; let details = `<p>${quest.totalPages} pages</p>`; if (!isConquered) { details = `<p>Read ${quest.currentPage} of ${quest.totalPages} pages</p>`; } if (quest.dateStarted) { details += `<p>From ${quest.dateStarted} to ${date}</p>`; } html += `<div class="timeline-entry"><div class="timeline-card"><h3>${quest.title}</h3><p>${quest.author || 'Unknown Author'}</p>${details}<div class="status-badge ${statusClass}">${statusText}</div></div></div>`; return html; }, ''); }
-    function renderAttributesPage() { if (!userData || !userData.attributes) return; perkPointsDisplay.textContent = userData.perkPoints || 0; const attrs = userData.attributes; const attrElements = { strength: { level: attrStrengthLevel, xpText: attrStrengthXpText, xpFill: attrStrengthXpFill }, intellect: { level: attrIntellectLevel, xpText: attrIntellectXpText, xpFill: attrIntellectXpFill }, wisdom: { level: attrWisdomLevel, xpText: attrWisdomXpText, xpFill: attrWisdomXpFill }, charisma: { level: attrCharismaLevel, xpText: attrCharismaXpText, xpFill: attrCharismaXpFill }, }; for (const attrKey in attrs) { const attr = attrs[attrKey]; const elements = attrElements[attrKey]; const xpNext = getXpForNextLevel(attr.level); elements.level.textContent = attr.level; elements.xpText.textContent = `${attr.xp} / ${xpNext} XP`; elements.xpFill.style.width = `${(attr.xp / xpNext) * 100}%`; } renderPerks(); }
-    function renderFeatsPage() { if (!userData) return; featsGrid.innerHTML = ''; for (const featId in FEATS_LIST) { const feat = FEATS_LIST[featId]; const unlockDate = userData.feats[featId]; const featCard = document.createElement('div'); featCard.classList.add('feat-card', unlockDate ? 'unlocked' : 'locked'); let content = `<div class="feat-name">${feat.name}</div><div class="feat-description">${feat.description}</div>`; if (unlockDate) { content += `<div class="feat-unlocked-date">Unlocked: ${unlockDate}</div>`; } featCard.innerHTML = content; featsGrid.appendChild(featCard); } }
-    function renderPerks() { if (!userData) return; const containers = { strength: strengthPerksContainer, intellect: intellectPerksContainer, wisdom: wisdomPerksContainer, charisma: charismaPerksContainer }; for (const attrKey in PERKS_LIST) { const container = containers[attrKey]; container.innerHTML = ''; const attrPerks = PERKS_LIST[attrKey]; for (const level in attrPerks) { attrPerks[level].forEach(perk => { const isUnlocked = userData.unlockedPerks.includes(perk.id); const canAfford = (userData.perkPoints || 0) > 0; const meetsLevel = userData.attributes[attrKey].level >= perk.requiredLevel; let stateClass = 'locked'; if (isUnlocked) { stateClass = 'unlocked'; } else if (canAfford && meetsLevel) { stateClass = 'available'; } const perkCard = document.createElement('div'); perkCard.classList.add('perk-card', stateClass); perkCard.dataset.perkId = perk.id; perkCard.dataset.attribute = attrKey; perkCard.dataset.level = level; perkCard.innerHTML = `<div class="perk-name">${perk.name}</div><div class="perk-description">${perk.description}</div><div class="perk-requirement">Requires ${attrKey.toUpperCase()} Level ${perk.requiredLevel}</div> ${isUnlocked ? '<div class="perk-unlocked-text">UNLOCKED</div>' : ''} `; container.appendChild(perkCard); }); } } }
-    function calculateStats() { const stats = { totalBooks: 0, totalPages: 0, mightiestBook: 'None Conquered', mightiestBookPages: 0, favGenre: 'N/A' }; const completed = userData.completedQuests; if (!completed || completed.length === 0) return stats; stats.totalBooks = completed.length; const genreCounts = {}; let maxPages = 0; completed.forEach(quest => { stats.totalPages += quest.totalPages; if (quest.totalPages > maxPages) { maxPages = quest.totalPages; stats.mightiestBook = quest.title; stats.mightiestBookPages = quest.totalPages; } if (quest.genre) { const genre = quest.genre.toLowerCase(); genreCounts[genre] = (genreCounts[genre] || 0) + 1; } }); if (Object.keys(genreCounts).length > 0) { stats.favGenre = Object.keys(genreCounts).reduce((a, b) => genreCounts[a] > genreCounts[b] ? a : b); } return stats; }
-    function renderUI() { if (!currentUser) return; const overallLevel = getOverallLevel(); playerLevelSpan.textContent = overallLevel; let totalXpPercentage = 0; let attributeCount = 0; for (const attrKey in userData.attributes) { const attr = userData.attributes[attrKey]; totalXpPercentage += (attr.xp / getXpForNextLevel(attr.level)) * 100; attributeCount++; } xpBarFill.style.width = `${totalXpPercentage / attributeCount}%`; if (userData.activeQuest) { activeQuestDisplay.classList.remove('hidden'); document.getElementById('quest-creator-section').classList.add('hidden'); renderActiveQuest(); } else { activeQuestDisplay.classList.add('hidden'); document.getElementById('quest-creator-section').classList.remove('hidden'); handleHideNewQuestForm(false); } renderCompletedQuests(); }
-    function renderActiveQuest() { const quest = userData.activeQuest; if (!quest) return; activeBookTitle.textContent = quest.title; activeBookAuthor.textContent = quest.author ? `by ${quest.author}` : ''; const progressPercentage = Math.min((quest.currentPage / quest.totalPages) * 100, 100); questProgressBar.style.width = `${progressPercentage}%`; questProgressText.textContent = `${quest.currentPage} / ${quest.totalPages} pages`; }
-    function renderCompletedQuests() { completedBooksList.innerHTML = ''; if (!userData.completedQuests || userData.completedQuests.length === 0) { completedBooksList.innerHTML = '<li>The Hall is empty. Go conquer some books!</li>'; return; } [...userData.completedQuests].reverse().forEach(quest => { const li = document.createElement('li'); li.innerHTML = `<span>${quest.title}</span> - Conquered on ${quest.dateConquered}<button class="undo-btn" data-id="${quest.id}" aria-label="Undo Conquest" title="Undo Conquest">↶</button>`; completedBooksList.appendChild(li); }); }
-    function initializeEventListeners() {
-        readingLogNav.addEventListener('click', () => switchView('log')); statsNav.addEventListener('click', () => switchView('stats')); journeyNav.addEventListener('click', () => switchView('journey')); attributesNav.addEventListener('click', () => switchView('attributes')); featsNav.addEventListener('click', () => switchView('feats')); bountiesNav.addEventListener('click', () => switchView('bounties')); clansNav.addEventListener('click', () => switchView('clans')); perksSection.addEventListener('click', handleUnlockPerk); timelineFilters.addEventListener('click', (event) => { if (event.target.classList.contains('filter-btn')) { playSound(soundClick); const buttons = timelineFilters.querySelectorAll('.filter-btn'); buttons.forEach(btn => btn.classList.remove('active')); event.target.classList.add('active'); currentJourneyFilter = event.target.dataset.filter; renderJourneyPage(); } }); bountiesGrid.addEventListener('click', handleAcceptBounty); const clickable = [addBookBtn, logPagesBtn, conquerBookBtn, surrenderQuestBtn, authBtn, loginBtn, signupBtn]; clickable.forEach(btn => btn.addEventListener('click', () => playSound(soundClick))); startNewQuestBtn.addEventListener('click', handleShowNewQuestForm); cancelAddBookBtn.addEventListener('click', () => handleHideNewQuestForm(true)); addBookBtn.addEventListener('click', handleAcceptQuest); logPagesBtn.addEventListener('click', handleLogPages); conquerBookBtn.addEventListener('click', handleConquerQuest); surrenderQuestBtn.addEventListener('click', handleSurrenderQuest); createClanBtn.addEventListener('click', handleCreateClan); leaveClanBtn.addEventListener('click', handleLeaveClan); clanList.addEventListener('click', handleJoinClan); completedBooksList.addEventListener('click', (event) => { if (event.target.classList.contains('undo-btn')) { playSound(soundClick); const questId = event.target.getAttribute('data-id'); handleUndoConquest(questId); } }); authBtn.addEventListener('click', handleAuthButtonClick); loginBtn.addEventListener('click', handleLogin); signupBtn.addEventListener('click', handleSignup); cancelAuthBtn.addEventListener('click', () => { authForm.classList.add('hidden'); clearAuthError(); }); bookGenreSelect.addEventListener('change', () => { if (bookGenreSelect.value === 'custom') { customGenreInput.classList.remove('hidden'); } else { customGenreInput.classList.add('hidden'); } }); editBookGenreSelect.addEventListener('change', () => { if (editBookGenreSelect.value === 'custom') { editCustomGenreInput.classList.remove('hidden'); } else { editCustomGenreInput.classList.add('hidden'); } }); editQuestBtn.addEventListener('click', openEditModal); saveQuestChangesBtn.addEventListener('click', handleSaveChanges); cancelEditQuestBtn.addEventListener('click', closeEditModal);
+    const getOverallLevel = (userObject = userData) => {
+        if (!userObject.attributes) return 1;
+        const { strength, intellect, wisdom, charisma } = userObject.attributes;
+        return Math.floor((strength.level + intellect.level + wisdom.level + charisma.level) / 4);
     }
-    function grantXP(baseAmount, context = {}) { const { attributes, unlockedPerks } = userData; if (!attributes) return { totalXP: baseAmount }; let totalXP = baseAmount; let strMultiplier = 1; if (unlockedPerks.includes('str_perk_5a')) { strMultiplier = 1.05; } if (unlockedPerks.includes('str_perk_20a')) { strMultiplier = 1.10; } if (context.type === 'log') { let finalAmount = baseAmount; if (unlockedPerks.includes('int_perk_5b') && baseAmount > 0) { const alreadyRead = userData.pagesReadToday - baseAmount; const applicablePages = Math.max(0, 10 - alreadyRead); finalAmount += Math.min(baseAmount, applicablePages); } totalXP = finalAmount * strMultiplier; } let intMultiplier = 1; if (unlockedPerks.includes('int_perk_5a')) { intMultiplier = 1.10; } if (unlockedPerks.includes('int_perk_15a')) { intMultiplier = 1.20; } if (context.type === 'intellect_bonus') { const intBonus = baseAmount * intMultiplier; totalXP = intBonus; } let wisMultiplier = 1; if (unlockedPerks.includes('wis_perk_5a')) { wisMultiplier = 1.10; } if (unlockedPerks.includes('wis_perk_15a')) { wisMultiplier = 1.20; } if (context.type === 'conquer' && context.quest.totalPages >= 500) { totalXP = baseAmount * wisMultiplier; } return { totalXP: Math.ceil(totalXP) }; }
-    function checkAttributesForLevelUp() { if (!userData || !userData.attributes) return; for (const attrKey in userData.attributes) { const attr = userData.attributes[attrKey]; let xpForNextLevel = getXpForNextLevel(attr.level); while (attr.xp >= xpForNextLevel) { attr.xp -= xpForNextLevel; attr.level++; if (attr.level % 5 === 0) { userData.perkPoints = (userData.perkPoints || 0) + 1; } if (userData.unlockedPerks.includes('cha_perk_20b') && Math.random() < 0.05) { userData.perkPoints = (userData.perkPoints || 0) + 1; } setTimeout(() => { playSound(soundQuestComplete); updateBarbarian('celebrate', `${attrKey.toUpperCase()} increased to Level ${attr.level}!`); }, 500); } } }
-    function checkForFeats(conqueredQuest = null) { if (!userData || !userData.feats) return; for (const featId in FEATS_LIST) { if (userData.feats[featId]) continue; let isUnlocked = false; switch (featId) { case 'page_pounder': if (userData.pagesReadToday >= 50) isUnlocked = true; break; case 'saga_smasher': if (userData.completedQuests.length >= 3) isUnlocked = true; break; case 'librarians_bane': if (userData.completedQuests.length >= 10) isUnlocked = true; break; case 'epic_explorer': if (conqueredQuest && conqueredQuest.totalPages >= 500) isUnlocked = true; break; case 'genre_master_fantasy': if (userData.completedQuests.filter(q => q.genre?.toLowerCase() === 'fantasy').length >= 5) isUnlocked = true; break; case 'genre_master_scifi': if (userData.completedQuests.filter(q => q.genre?.toLowerCase() === 'science fiction').length >= 5) isUnlocked = true; break; } if (isUnlocked) { userData.feats[featId] = new Date().toLocaleDateString('en-GB'); if (userData.unlockedPerks.includes('int_perk_15b')) { userData.attributes.intellect.xp += 300; } setTimeout(() => { playSound(soundQuestComplete); updateBarbarian('celebrate', `FEAT UNLOCKED: ${FEATS_LIST[featId].name}`); }, 1500); } } }
-    async function handleUnlockPerk(event) { const perkCard = event.target.closest('.perk-card.available'); if (!perkCard) return; const perkId = perkCard.dataset.perkId; const attribute = perkCard.dataset.attribute; const level = perkCard.dataset.level; const perk = PERKS_LIST[attribute][level].find(p => p.id === perkId); if (confirm(`Unlock the "${perk.name}" perk for 1 Perk Point?`)) { playSound(soundQuestStart); userData.perkPoints--; userData.unlockedPerks.push(perkId); if(userData.unlockedPerks.includes('cha_perk_10b')) { updateBarbarian('celebrate', `A wise choice! You have learned the ways of "${perk.name}"!`); } else { updateBarbarian('celebrate', `PERK UNLOCKED: ${perk.name}!`); } await saveUserDataToFirestore(); renderAttributesPage(); } }
-    async function handleAcceptBounty(event) { if (!event.target.classList.contains('accept-bounty-btn')) return; playSound(soundQuestStart); const bountyId = event.target.dataset.bountyId; if (!userData.bounties) { userData.bounties = {}; } userData.bounties[bountyId] = { progress: 0, startDate: new Date().toISOString() }; await saveUserDataToFirestore(); renderBountiesPage(); }
-    function checkForBountyCompletion() { if (!userData || !userData.bounties) return false; let bountyCompleted = false; for (const bountyId in userData.bounties) { const activeBounty = userData.bounties[bountyId]; const bountyDef = BOUNTY_LIST[bountyId]; if (activeBounty.progress >= bountyDef.target) { bountyCompleted = true; userData.attributes.strength.xp += bountyDef.reward; delete userData.bounties[bountyId]; setTimeout(() => { playSound(soundQuestComplete); updateBarbarian('celebrate', `BOUNTY COMPLETE: ${bountyDef.title}!`); }, 1000); } } return bountyCompleted; }
-    function handleShowNewQuestForm() { playSound(soundClick); noActiveQuestDisplay.classList.add('hidden'); newQuestForm.classList.remove('hidden'); bookTitleInput.focus(); }
-    function handleHideNewQuestForm(playSoundOnClick = true) { if(playSoundOnClick) playSound(soundClick); newQuestForm.classList.add('hidden'); noActiveQuestDisplay.classList.remove('hidden'); clearNewQuestForm(); }
-    async function handleAcceptQuest() { const title = bookTitleInput.value.trim(); const author = bookAuthorInput.value.trim(); let genre = ''; if (bookGenreSelect.value === 'custom') { genre = customGenreInput.value.trim(); } else { genre = bookGenreSelect.value; } const totalPages = parseInt(bookTotalPagesInput.value); if (!title || !genre || isNaN(totalPages) || totalPages <= 0) { playSound(soundError); updateBarbarian('angry', randomChoice(BARB_ISMS["Grizzled Veteran"].error)); return; } userData.activeQuest = { id: `quest_${Date.now()}`, title, author, genre, totalPages, currentPage: 0, status: 'active', dateStarted: new Date().toLocaleDateString('en-GB') }; clearNewQuestForm(); updateBarbarian('pleased', randomChoice(BARB_ISMS["Grizzled Veteran"].saving_data)); await saveUserDataToFirestore(); playSound(soundQuestStart); updateBarbarian('celebrate', randomChoice(BARB_ISMS["Grizzled Veteran"].quest_accepted)); renderUI(); }
-    async function handleLogPages() { const pages = parseInt(pagesReadInput.value); if (isNaN(pages) || pages <= 0) { playSound(soundError); updateBarbarian('angry', randomChoice(BARB_ISMS["Grizzled Veteran"].error)); return; } const quest = userData.activeQuest; const remainingPages = quest.totalPages - quest.currentPage; if (pages > remainingPages) { playSound(soundError); updateBarbarian('angry', `${BARB_ISMS["Grizzled Veteran"].error_page_count[0]} YOU ONLY HAVE ${remainingPages} PAGES LEFT!`); return; } quest.currentPage += pages; userData.pagesReadToday = (userData.pagesReadToday || 0) + pages; const { totalXP, bonusMessages } = grantXP(pages, { type: 'log' }); userData.attributes.strength.xp += totalXP; if(userData.bounties && userData.bounties.weekly_pages) { userData.bounties.weekly_pages.progress = (userData.bounties.weekly_pages.progress || 0) + pages; } pagesReadInput.value = ''; checkForFeats(); checkForBountyCompletion(); checkAttributesForLevelUp(); updateBarbarian('pleased', randomChoice(BARB_ISMS["Grizzled Veteran"].saving_data)); await saveUserDataToFirestore(); let encouragement = randomChoice(BARB_ISMS["Grizzled Veteran"].general_encouragement); if (userData.unlockedPerks.includes('cha_perk_1a') || (userData.attributes.charisma.level >= 10)) { encouragement = randomChoice(BARB_ISMS["Grizzled Veteran"].charmed_encouragement); } if (bonusMessages.length > 0) { encouragement += `\n${bonusMessages.join(' ')}`; } playSound(soundPageTurn); updateBarbarian('pleased', encouragement); renderUI(); }
-    async function handleConquerQuest() { const quest = userData.activeQuest; if (!quest) return; checkForFeats(quest); const { totalPages, genre } = quest; let wisXp = Math.floor(totalPages / 2); let { totalXP: finalWisXP, bonusMessages: wisMessages } = grantXP(wisXp, { type: 'conquer', quest }); userData.attributes.wisdom.xp += finalWisXP; if(userData.unlockedPerks.includes('str_perk_5b')) { userData.attributes.strength.xp += 50; } const genreLower = genre.toLowerCase(); if (!(userData.conqueredGenres || []).includes(genreLower)) { const { totalXP: intXP } = grantXP(250, { type: 'intellect_bonus' }); userData.attributes.intellect.xp += intXP; userData.conqueredGenres.push(genreLower); } const socialGenres = ['romance', 'fantasy']; if (socialGenres.includes(genreLower) && userData.unlockedPerks.includes('cha_perk_1b')) { userData.attributes.charisma.xp += 50; } if (socialGenres.includes(genreLower) && userData.unlockedPerks.includes('cha_perk_15a')) { userData.attributes.charisma.xp += 50; } if (['non-fiction', 'history'].includes(genreLower) && userData.unlockedPerks.includes('cha_perk_15b')) { userData.attributes.charisma.xp += 200; } if (userData.bounties && userData.bounties.monthly_conqueror) { userData.bounties.monthly_conqueror.progress = (userData.bounties.monthly_conqueror.progress || 0) + 1; } const conqueredQuest = { ...quest, status: 'conquered', dateConquered: new Date().toLocaleDateString('en-GB') }; userData.completedQuests.push(conqueredQuest); userData.activeQuest = null; checkForFeats(); const completedBounty = checkForBountyCompletion(); checkAttributesForLevelUp(); updateBarbarian('celebrate', randomChoice(BARB_ISMS["Grizzled Veteran"].saving_data)); await saveUserDataToFirestore(); let celebrationMessage = randomChoice(BARB_ISMS["Grizzled Veteran"].book_completed); if (!completedBounty && wisMessages.length > 0) { celebrationMessage += `\n${wisMessages.join(' ')}`; } playSound(soundQuestComplete); updateBarbarian('celebrate', celebrationMessage); renderUI(); }
-    async function handleSurrenderQuest() { if (confirm("Are you sure you wish to flee from this quest, coward?")) { playSound(soundError); const abandonedQuest = { ...userData.activeQuest, status: 'abandoned', dateAbandoned: new Date().toLocaleDateString('en-GB') }; userData.archivedQuests.push(abandonedQuest); userData.activeQuest = null; updateBarbarian('angry', randomChoice(BARB_ISMS["Grizzled Veteran"].saving_data)); await saveUserDataToFirestore(); updateBarbarian('angry', randomChoice(BARB_ISMS["Grizzled Veteran"].quest_surrendered)); renderUI(); } }
-    async function handleUndoConquest(questId) { if (userData.activeQuest) { playSound(soundError); updateBarbarian('angry', randomChoice(BARB_ISMS["Grizzled Veteran"].error_undo)); return; } const questToUndo = userData.completedQuests.find(q => q.id === questId); if (questToUndo) { delete questToUndo.dateConquered; questToUndo.status = 'active'; userData.activeQuest = questToUndo; userData.completedQuests = userData.completedQuests.filter(q => q.id !== questId); updateBarbarian('pleased', randomChoice(BARB_ISMS["Grizzled Veteran"].saving_data)); await saveUserDataToFirestore(); updateBarbarian('pleased', randomChoice(BARB_ISMS["Grizzled Veteran"].quest_undone)); renderUI(); } }
-    function openEditModal() { playSound(soundClick); if (!userData.activeQuest) return; const quest = userData.activeQuest; editBookTitleInput.value = quest.title; editBookAuthorInput.value = quest.author; editBookTotalPagesInput.value = quest.totalPages; const genreOptions = Array.from(editBookGenreSelect.options).map(opt => opt.value); if (genreOptions.includes(quest.genre)) { editBookGenreSelect.value = quest.genre; editCustomGenreInput.classList.add('hidden'); } else { editBookGenreSelect.value = 'custom'; editCustomGenreInput.value = quest.genre; editCustomGenreInput.classList.remove('hidden'); } editQuestModal.classList.remove('hidden'); }
-    function closeEditModal() { playSound(soundClick); editQuestModal.classList.add('hidden'); }
-    async function handleSaveChanges() { playSound(soundClick); if (!userData.activeQuest) return; const newTitle = editBookTitleInput.value.trim(); const newAuthor = editBookAuthorInput.value.trim(); let newGenre = ''; if (editBookGenreSelect.value === 'custom') { newGenre = editCustomGenreInput.value.trim(); } else { newGenre = editBookGenreSelect.value; } const newTotalPages = parseInt(editBookTotalPagesInput.value); if (!newTitle || !newGenre || isNaN(newTotalPages) || newTotalPages <= 0) { playSound(soundError); alert("Fool! Title, Genre, and a valid Page Count are required."); return; } userData.activeQuest.title = newTitle; userData.activeQuest.author = newAuthor; userData.activeQuest.genre = newGenre; userData.activeQuest.totalPages = newTotalPages; await saveUserDataToFirestore(); renderUI(); closeEditModal(); }
-    function clearNewQuestForm() { bookTitleInput.value = ''; bookAuthorInput.value = ''; bookGenreSelect.selectedIndex = 0; customGenreInput.value = ''; customGenreInput.classList.add('hidden'); bookTotalPagesInput.value = ''; }
-    async function handleCreateClan() { playSound(soundQuestStart); const clanName = clanNameInput.value.trim(); if (clanName.length < 3 || clanName.length > 25) { playSound(soundError); updateBarbarian('angry', "A clan name must be between 3 and 25 characters!"); return; } if (userData.clanId) { playSound(soundError); updateBarbarian('angry', "You are already in a clan!"); return; } updateBarbarian('pleased', 'Forging your new War-Band...'); try { const batch = db.batch(); const clanRef = db.collection('clans').doc(); const userRef = db.collection('users').doc(currentUser.uid); const clanData = { name: clanName, leaderId: currentUser.uid, memberIds: [currentUser.uid], createdAt: firebase.firestore.FieldValue.serverTimestamp() }; batch.set(clanRef, clanData); batch.update(userRef, { clanId: clanRef.id, clanName: clanName }); await batch.commit(); userData.clanId = clanRef.id; userData.clanName = clanName; updateBarbarian('celebrate', `The "${clanName}" war-band has been founded!`); renderClansPage(); } catch (error) { console.error("Error creating clan: ", error); updateBarbarian('angry', "The founding ritual failed! Try again."); } }
-    async function handleJoinClan(event) { if (!event.target.classList.contains('join-btn')) return; playSound(soundQuestStart); const clanId = event.target.dataset.clanId; const clanName = event.target.dataset.clanName; if (userData.clanId) { updateBarbarian('angry', "You are already in a clan!"); return; } updateBarbarian('pleased', `Joining the ${clanName} war-band...`); try { const batch = db.batch(); const userRef = db.collection('users').doc(currentUser.uid); const clanRef = db.collection('clans').doc(clanId); batch.update(userRef, { clanId: clanId, clanName: clanName }); batch.update(clanRef, { memberIds: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) }); await batch.commit(); userData.clanId = clanId; userData.clanName = clanName; updateBarbarian('celebrate', `You have joined the ranks of ${clanName}!`); renderClansPage(); } catch (error) { console.error("Error joining clan:", error); updateBarbarian('angry', "The joining ritual failed! Try again."); } }
-    async function handleLeaveClan(withConfirmation = true) { playSound(soundError); if (!userData.clanId) return; const clanDoc = await db.collection('clans').doc(userData.clanId).get(); if(clanDoc.exists && clanDoc.data().leaderId === currentUser.uid && clanDoc.data().memberIds.length > 1) { alert("The clan leader cannot abandon their war-band! You must pass leadership to another (feature coming soon)."); return; } const doLeave = withConfirmation ? confirm(`Are you sure you wish to abandon the ${userData.clanName} war-band?`) : true; if (doLeave) { updateBarbarian('angry', 'Leaving the clan...'); try { const batch = db.batch(); const userRef = db.collection('users').doc(currentUser.uid); const clanRef = db.collection('clans').doc(userData.clanId); batch.update(userRef, { clanId: null, clanName: null }); batch.update(clanRef, { memberIds: firebase.firestore.FieldValue.arrayRemove(currentUser.uid) }); await batch.commit(); const oldClanName = userData.clanName; userData.clanId = null; userData.clanName = null; updateBarbarian('pleased', `You have left the ${oldClanName} war-band.`); renderClansPage(); } catch (error) { console.error("Error leaving clan:", error); updateBarbarian('angry', "Could not leave the clan."); } } }
     
-    // --- AUTH & DB ---
-    function showAuthError(message) { authErrorMessage.textContent = message; authErrorMessage.classList.add('visible'); }
-    function clearAuthError() { authErrorMessage.textContent = ''; authErrorMessage.classList.remove('visible'); }
-    function getAuthErrorMessage(errorCode) { return (BARB_ISMS["Grizzled Veteran"].auth_errors[errorCode]) || BARB_ISMS["Grizzled Veteran"].auth_errors["default"]; }
-    function handleAuthButtonClick() { if (currentUser) { auth.signOut(); } else { authForm.classList.remove('hidden'); clearAuthError(); } }
-    async function handleLogin() { clearAuthError(); try { await auth.signInWithEmailAndPassword(authEmailInput.value, authPasswordInput.value); } catch (error) { playSound(soundError); updateBarbarian('angry'); showAuthError(getAuthErrorMessage(error.code)); } }
-    async function handleSignup() { clearAuthError(); try { const userCredential = await auth.createUserWithEmailAndPassword(authEmailInput.value, authPasswordInput.value); if (authUsernameInput.value.trim()) { await userCredential.user.updateProfile({ displayName: authUsernameInput.value.trim() }); } } catch (error) { playSound(soundError); updateBarbarian('angry'); showAuthError(getAuthErrorMessage(error.code)); } }
-    async function saveUserDataToFirestore() { if (currentUser) { await db.collection('users').doc(currentUser.uid).set(userData); } }
-    async function loadUserDataFromFirestore() { const userRef = db.collection('users').doc(currentUser.uid); const doc = await userRef.get(); if (doc.exists) { const loadedData = doc.data(); let needsSave = false; if (loadedData.completedQuests?.length > 0) { loadedData.completedQuests.forEach(quest => { if (!quest.id) { quest.id = `quest_legacy_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`; needsSave = true; } }); } userData = { ...defaultUserData, ...loadedData }; if (!userData.attributes || !userData.attributes.strength.hasOwnProperty('level')) { needsSave = true; userData.attributes = { ...defaultUserData.attributes }; if (loadedData.level) { userData.attributes.strength.xp = (loadedData.level * 1000 + (loadedData.xp || 0)) / 2; } } if (!userData.conqueredGenres) { userData.conqueredGenres = []; needsSave = true; } if (!userData.unlockedPerks) { userData.unlockedPerks = []; needsSave = true; } if (userData.perkPoints === undefined) { userData.perkPoints = 0; needsSave = true;} if (userData.bounties === undefined) { userData.bounties = {}; needsSave = true;} if (needsSave) { await db.collection('users').doc(currentUser.uid).set(userData); } const today = new Date().toDateString(); if(userData.lastLoginDate !== today) { userData.pagesReadToday = 0; userData.lastLoginDate = today; } } else { userData = { ...defaultUserData }; await saveUserDataToFirestore(); } }
-    
-    // --- APP ENTRY POINT ---
-    async function handleUserLoggedIn(user) { currentUser = user; authForm.classList.add('hidden'); userNameSpan.textContent = user.displayName || user.email.split('@')[0]; authBtn.textContent = "Log Out"; await loadUserDataFromFirestore(); updateBarbarian('idle', randomChoice(BARB_ISMS["Grizzled Veteran"].welcome)); renderUI(); }
-    function handleUserLoggedOut() { currentUser = null; authForm.classList.add('hidden'); userData = { ...defaultUserData }; userNameSpan.textContent = "Guest Warrior"; authBtn.textContent = "Sign Up / Log In"; updateBarbarian('idle', "Hmph. A stranger. Sign up if you want your deeds remembered."); switchView('log'); renderUI(); }
-    auth.onAuthStateChanged((user) => { if (user) { handleUserLoggedIn(user); } else { handleUserLoggedOut(); } });
+    const VIEWS = {
+        [enums.views.LOG]: { element: UI.mainView, nav: UI.nav.readingLog, renderFunc: null },
+        [enums.views.STATS]: { element: UI.statsView, nav: UI.nav.stats, renderFunc: renderStatsPage },
+        [enums.views.JOURNEY]: { element: UI.journeyView, nav: UI.nav.journey, renderFunc: renderJourneyPage },
+        [enums.views.ATTRIBUTES]: { element: UI.attributesView, nav: UI.nav.attributes, renderFunc: renderAttributesPage },
+        [enums.views.FEATS]: { element: UI.featsView, nav: UI.nav.feats, renderFunc: renderFeatsPage },
+        [enums.views.BOUNTIES]: { element: UI.bountiesView, nav: UI.nav.bounties, renderFunc: renderBountiesPage },
+        [enums.views.CLANS]: { element: UI.clansView, nav: UI.nav.clans, renderFunc: renderClansPage },
+    };
 
+    function switchView(viewToShow) {
+        playSound(UI.sounds.click);
+        Object.values(VIEWS).forEach(view => {
+            view.element.classList.add('hidden');
+            view.nav.classList.remove('active');
+        });
+        const targetView = VIEWS[viewToShow] || VIEWS[enums.views.LOG];
+        targetView.element.classList.remove('hidden');
+        targetView.nav.classList.add('active');
+        if (targetView.renderFunc) targetView.renderFunc();
+    }
+
+    async function renderClansPage() {
+        if (!userData) return;
+        if (userData.clanId) {
+            UI.clans.noClanView.classList.add('hidden');
+            UI.clans.memberView.classList.remove('hidden');
+            try {
+                const clanDoc = await db.collection('clans').doc(userData.clanId).get();
+                if(clanDoc.exists) {
+                    const clanData = clanDoc.data();
+                    UI.clans.hallHeader.innerHTML = `<h2>${clanData.name}</h2>`;
+                    const memberIds = clanData.memberIds || [];
+                    const memberPromises = memberIds.map(id => db.collection('users').doc(id).get());
+                    const memberDocs = await Promise.all(memberPromises);
+                    UI.clans.memberList.innerHTML = memberDocs.map(memberDoc => {
+                        if (memberDoc.exists) {
+                            const memberData = memberDoc.data();
+                            const isLeader = memberDoc.id === clanData.leaderId;
+                            return `<li class="clan-member-item"><div class="clan-member-info"><div class="name">${memberData.displayName || memberDoc.id.substring(0,8)} ${isLeader ? '<span class="leader-badge">★ Leader</span>' : ''}</div><div class="level">Overall Level: ${getOverallLevel(memberData)}</div></div></li>`;
+                        }
+                        return '';
+                    }).join('');
+                } else { handleLeaveClan(false); }
+            } catch(error){ console.error("Error fetching clan details:", error); }
+        } else {
+            UI.clans.noClanView.classList.remove('hidden');
+            UI.clans.memberView.classList.add('hidden');
+            try {
+                const clansSnapshot = await db.collection('clans').orderBy('name').limit(20).get();
+                UI.clans.list.innerHTML = clansSnapshot.empty ? '<li class="clan-list-item-placeholder">No war-bands have been founded yet. Be the first!</li>' : clansSnapshot.docs.map(doc => {
+                    const clan = doc.data();
+                    return `<li class="clan-list-item"><div class="clan-info"><div class="name">${clan.name}</div><div class="members">${clan.memberIds.length} member(s)</div></div><button class="join-btn" data-clan-id="${doc.id}" data-clan-name="${clan.name}">Join</button></li>`;
+                }).join('');
+            } catch (error) { console.error("Error fetching clans:", error); }
+        }
+    }
+    
+    function renderBountiesPage() {
+        if (!userData) return;
+        UI.bounties.grid.innerHTML = '';
+        for (const bountyId in BOUNTY_LIST) {
+            const bountyDef = BOUNTY_LIST[bountyId];
+            const activeBounty = userData.bounties[bountyId];
+            const card = document.createElement('div');
+            // FIX: Added 'ui-card' to apply the base card styles
+            card.classList.add('ui-card', 'bounty-card');
+            let content = `<h3>${bountyDef.title}</h3><p>${bountyDef.description}</p>`;
+            if (activeBounty) {
+                card.classList.add('in-progress');
+                const progress = activeBounty.progress || 0;
+                const percentage = (progress / bountyDef.target) * 100;
+                content += `<div class="progress-bar-container"><div class="progress-bar"><div class="progress-bar-fill" style="width: ${percentage}%;"></div></div><div class="progress-bar-text">${progress} / ${bountyDef.target}</div></div><div class="bounty-reward">Reward: ${bountyDef.reward} XP</div>`;
+            } else {
+                content += `<div class="bounty-reward">Reward: ${bountyDef.reward} XP</div><button class="accept-bounty-btn" data-bounty-id="${bountyId}">Accept Bounty</button>`;
+            }
+            card.innerHTML = content;
+            UI.bounties.grid.appendChild(card);
+        }
+    }
+
+    function renderStatsPage() {
+        if (!userData || !userData.completedQuests) return;
+        const stats = calculateStats();
+        UI.stats.totalBooks.textContent = stats.totalBooks;
+        UI.stats.totalPages.textContent = stats.totalPages.toLocaleString();
+        UI.stats.mightiestBook.textContent = stats.mightiestBook;
+        UI.stats.mightiestBookPages.textContent = stats.mightiestBookPages > 0 ? `${stats.mightiestBookPages.toLocaleString()} pages` : '';
+        UI.stats.favGenre.textContent = stats.favGenre;
+        UI.stats.favGenre.style.textTransform = 'capitalize';
+    }
+
+    function renderJourneyPage() {
+        if (!userData) return;
+        const allEvents = [...(userData.completedQuests || []), ...(userData.archivedQuests || [])];
+        const filteredEvents = allEvents.filter(quest => currentJourneyFilter === 'all' || quest.status === currentJourneyFilter);
+
+        if (filteredEvents.length === 0) {
+            UI.journey.container.innerHTML = `<p style="text-align: center; color: var(--text-secondary);">No entries found for this filter.</p>`;
+            return;
+        }
+        const parseDate = (quest) => { const ds = quest.dateConquered || quest.dateAbandoned; return ds ? new Date(ds.split('/').reverse().join('-')) : new Date(0); };
+        filteredEvents.sort((a, b) => parseDate(b) - parseDate(a));
+
+        let lastMonth = null;
+        UI.journey.container.innerHTML = filteredEvents.map(quest => {
+            let html = '';
+            const eventDate = parseDate(quest);
+            const eventMonth = eventDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+            if (eventMonth !== lastMonth) {
+                html += `<div class="timeline-divider"><span>— ${eventMonth} —</span></div>`;
+                lastMonth = eventMonth;
+            }
+            const isConquered = quest.status === enums.questStatus.CONQUERED;
+            html += `<div class="timeline-entry"><div class="timeline-card"><h3>${quest.title}</h3><p>${quest.author||'Unknown'}</p><p>${isConquered ? quest.totalPages : `Read ${quest.currentPage} of ${quest.totalPages}`} pages</p><p>From ${quest.dateStarted} to ${quest.dateConquered||quest.dateAbandoned}</p><div class="status-badge ${isConquered ? 'status-conquered':'status-abandoned'}">${isConquered ? 'Conquered':'Abandoned'}</div></div></div>`;
+            return html;
+        }).join('');
+    }
+
+    function renderAttributesPage() {
+        if (!userData || !userData.attributes) return;
+        UI.attributes.perkPointsDisplay.textContent = userData.perkPoints || 0;
+        Object.entries(userData.attributes).forEach(([attrKey, attrData]) => {
+            const attrUI = UI.attributes[attrKey];
+            if (attrUI) {
+                const xpNext = getXpForNextLevel(attrData.level);
+                attrUI.level.textContent = attrData.level;
+                attrUI.xpText.textContent = `${attrData.xp} / ${xpNext} XP`;
+                attrUI.xpFill.style.width = `${(attrData.xp / xpNext) * 100}%`;
+            }
+        });
+        renderPerks();
+    }
+    
+    function renderFeatsPage() {
+        if (!userData) return;
+        UI.feats.grid.innerHTML = '';
+        for (const featId in FEATS_LIST) {
+            const feat = FEATS_LIST[featId];
+            const unlockDate = userData.feats[featId];
+            const featCard = document.createElement('div');
+            // FIX: Added 'ui-card' to apply the base card styles
+            featCard.classList.add('ui-card', 'feat-card', unlockDate ? 'unlocked' : 'locked');
+            featCard.innerHTML = `<div class="feat-name">${feat.name}</div><div class="feat-description">${feat.description}</div>${unlockDate ? `<div class="feat-unlocked-date">Unlocked: ${unlockDate}</div>` : ''}`;
+            UI.feats.grid.appendChild(featCard);
+        }
+    }
+    
+    function renderPerks() {
+        if (!userData) return;
+        Object.entries(PERKS_LIST).forEach(([attrKey, attrPerks]) => {
+            const container = UI.attributes[attrKey].perksContainer;
+            container.innerHTML = attrPerks.map(perk => {
+                const isUnlocked = userData.unlockedPerks.includes(perk.id);
+                const canAfford = (userData.perkPoints || 0) > 0;
+                const meetsLevel = userData.attributes[attrKey].level >= perk.requiredLevel;
+                let stateClass = isUnlocked ? 'unlocked' : (canAfford && meetsLevel ? 'available' : 'locked');
+                return `<div class="ui-card perk-card ${stateClass}" data-perk-id="${perk.id}" data-attribute="${attrKey}">
+                    <div class="perk-name">${perk.name}</div>
+                    <div class="perk-description">${perk.description}</div>
+                    <div class="perk-requirement">Requires ${attrKey.toUpperCase()} Level ${perk.requiredLevel}</div>
+                    ${isUnlocked ? '<div class="perk-unlocked-text">UNLOCKED</div>' : ''}
+                </div>`;
+            }).join('');
+        });
+    }
+
+    function calculateStats() {
+        const stats = { totalBooks: 0, totalPages: 0, mightiestBook: 'None Conquered', mightiestBookPages: 0, favGenre: 'N/A' };
+        const completed = userData.completedQuests;
+        if (!completed || completed.length === 0) return stats;
+        stats.totalBooks = completed.length;
+        const genreCounts = {};
+        completed.forEach(quest => {
+            stats.totalPages += quest.totalPages;
+            if (quest.totalPages > stats.mightiestBookPages) {
+                stats.mightiestBookPages = quest.totalPages;
+                stats.mightiestBook = quest.title;
+            }
+            if (quest.genre) { genreCounts[quest.genre.toLowerCase()] = (genreCounts[quest.genre.toLowerCase()] || 0) + 1; }
+        });
+        if (Object.keys(genreCounts).length > 0) { stats.favGenre = Object.keys(genreCounts).reduce((a, b) => genreCounts[a] > genreCounts[b] ? a : b); }
+        return stats;
+    }
+
+    function renderUI() {
+        if (!currentUser) return;
+        UI.player.level.textContent = getOverallLevel();
+        let totalXpPercentage = 0;
+        const attrs = Object.values(userData.attributes);
+        attrs.forEach(attr => { totalXpPercentage += (attr.xp / getXpForNextLevel(attr.level)) * 100; });
+        UI.player.xpBarFill.style.width = `${totalXpPercentage / attrs.length}%`;
+        const hasActiveQuest = !!userData.activeQuest;
+        UI.activeQuest.display.classList.toggle('hidden', !hasActiveQuest);
+        UI.newQuest.creatorSection.classList.toggle('hidden', hasActiveQuest);
+        if (hasActiveQuest) { renderActiveQuest(); } else { handleHideNewQuestForm(false); }
+        renderCompletedQuests();
+    }
+    
+    function renderActiveQuest() {
+        const quest = userData.activeQuest;
+        if (!quest) return;
+        UI.activeQuest.title.textContent = quest.title;
+        UI.activeQuest.author.textContent = quest.author ? `by ${quest.author}` : '';
+        UI.activeQuest.progressBar.style.width = `${Math.min((quest.currentPage / quest.totalPages) * 100, 100)}%`;
+        UI.activeQuest.progressText.textContent = `${quest.currentPage} / ${quest.totalPages} pages`;
+    }
+
+    function renderCompletedQuests() {
+        const completed = userData.completedQuests || [];
+        UI.completed.list.innerHTML = completed.length === 0 ? '<li>The Hall is empty. Go conquer some books!</li>' : [...completed].reverse().map(quest => `<li><span>${quest.title}</span> - Conquered on ${quest.dateConquered}<button class="undo-btn" data-id="${quest.id}" aria-label="Undo Conquest" title="Undo Conquest">↶</button></li>`).join('');
+    }
+
+    function applyXpGains(gains) { Object.entries(gains).forEach(([attrKey, amount]) => { if (userData.attributes[attrKey] && amount > 0) { userData.attributes[attrKey].xp += Math.ceil(amount); } }); }
+    function calculateXpGains(context) {
+        const { type, pages, quest } = context;
+        const { unlockedPerks, pagesReadToday } = userData;
+        const xp = { strength: 0, intellect: 0, wisdom: 0, charisma: 0 };
+        const hasPerk = (id) => unlockedPerks.includes(id);
+
+        if (type === 'logPages') {
+            xp.strength += pages;
+            if (hasPerk('int_perk_5b')) { xp.strength += Math.min(pages, Math.max(0, 10 - (pagesReadToday - pages))); }
+        } else if (type === 'conquer') {
+            xp.wisdom += Math.floor(quest.totalPages / 2);
+            if (hasPerk('str_perk_5b')) xp.strength += 50;
+            if (quest.totalPages >= 500 && hasPerk('str_perk_15b')) xp.strength += xp.wisdom;
+            const genreLower = quest.genre.toLowerCase();
+            if (!userData.conqueredGenres.includes(genreLower)) {
+                let bonus = hasPerk('int_perk_20b') ? 750 : 250;
+                if (hasPerk('int_perk_15a')) bonus *= 1.2; else if (hasPerk('int_perk_5a')) bonus *= 1.1;
+                xp.intellect += bonus;
+            }
+            if (['fantasy', 'romance'].includes(genreLower) && hasPerk('cha_perk_1b')) xp.charisma += (hasPerk('cha_perk_15a') ? 100 : 50);
+            if (['non-fiction', 'history'].includes(genreLower) && hasPerk('cha_perk_15b')) xp.charisma += 200;
+        }
+        
+        if (hasPerk('str_perk_20a')) xp.strength *= 1.10; else if (hasPerk('str_perk_5a')) xp.strength *= 1.05;
+        if (hasPerk('str_perk_15a')) xp.strength *= 1.10;
+        if (hasPerk('int_perk_20a')) xp.intellect *= 1.1; if (hasPerk('wis_perk_20a')) xp.wisdom *= 1.1; if (hasPerk('cha_perk_20a')) xp.charisma *= 1.1;
+        return xp;
+    }
+
+    function checkAttributesForLevelUp() {
+        if (!userData || !userData.attributes) return;
+        Object.entries(userData.attributes).forEach(([attrKey, attr]) => {
+            let xpForNextLevel = getXpForNextLevel(attr.level);
+            while (attr.xp >= xpForNextLevel) {
+                attr.xp -= xpForNextLevel; attr.level++;
+                if (attr.level % 5 === 0) userData.perkPoints = (userData.perkPoints || 0) + 1;
+                if (userData.unlockedPerks.includes('cha_perk_20b') && Math.random() < 0.05) userData.perkPoints = (userData.perkPoints || 0) + 1;
+                setTimeout(() => { playSound(UI.sounds.questComplete); updateBarbarian('celebrate', `${attrKey.toUpperCase()} increased to Level ${attr.level}!`); }, 500);
+                xpForNextLevel = getXpForNextLevel(attr.level);
+            }
+        });
+    }
+
+    function checkForFeats(conqueredQuest = null) {
+        if (!userData || !userData.feats) return;
+        for (const featId in FEATS_LIST) {
+            if (userData.feats[featId]) continue;
+            let isUnlocked = false;
+            switch (featId) {
+                case 'page_pounder': if (userData.pagesReadToday >= 50) isUnlocked = true; break;
+                case 'saga_smasher': if (userData.completedQuests.length >= 3) isUnlocked = true; break;
+                case 'librarians_bane': if (userData.completedQuests.length >= 10) isUnlocked = true; break;
+                case 'epic_explorer': if (conqueredQuest && conqueredQuest.totalPages >= 500) isUnlocked = true; break;
+                case 'genre_master_fantasy': if (userData.completedQuests.filter(q => q.genre?.toLowerCase() === 'fantasy').length >= 5) isUnlocked = true; break;
+                case 'genre_master_scifi': if (userData.completedQuests.filter(q => q.genre?.toLowerCase() === 'science fiction').length >= 5) isUnlocked = true; break;
+            }
+            if (isUnlocked) {
+                userData.feats[featId] = new Date().toLocaleDateString('en-GB');
+                if (userData.unlockedPerks.includes('int_perk_15b')) userData.attributes.intellect.xp += 300;
+                setTimeout(() => { playSound(UI.sounds.questComplete); updateBarbarian('celebrate', `FEAT UNLOCKED: ${FEATS_LIST[featId].name}`); }, 1500);
+            }
+        }
+    }
+    
+    function checkForBountyCompletion() {
+        if (!userData || !userData.bounties) return;
+        for (const bountyId in userData.bounties) {
+            const activeBounty = userData.bounties[bountyId];
+            const bountyDef = BOUNTY_LIST[bountyId];
+            if (activeBounty.progress >= bountyDef.target) {
+                userData.attributes.strength.xp += bountyDef.reward;
+                delete userData.bounties[bountyId];
+                setTimeout(() => { playSound(UI.sounds.questComplete); updateBarbarian('celebrate', `BOUNTY COMPLETE: ${bountyDef.title}!`); }, 1000);
+            }
+        }
+    }
+
+    async function handleUnlockPerk(event) {
+        const perkCard = event.target.closest('.perk-card.available');
+        if (!perkCard) return;
+        const { perkId, attribute } = perkCard.dataset;
+        const perk = PERKS_LIST[attribute].find(p => p.id === perkId);
+        if (confirm(`Unlock the "${perk.name}" perk for 1 Perk Point?`)) {
+            playSound(UI.sounds.questStart);
+            userData.perkPoints--; userData.unlockedPerks.push(perkId);
+            updateBarbarian('celebrate', userData.unlockedPerks.includes('cha_perk_10b') ? `A wise choice! You have learned the ways of "${perk.name}"!` : `PERK UNLOCKED: ${perk.name}!`);
+            await saveUserDataToFirestore(); renderAttributesPage();
+        }
+    }
+    
+    async function handleAcceptBounty(event) {
+        if (!event.target.classList.contains('accept-bounty-btn')) return;
+        playSound(UI.sounds.questStart);
+        userData.bounties[event.target.dataset.bountyId] = { progress: 0, startDate: new Date().toISOString() };
+        await saveUserDataToFirestore(); renderBountiesPage();
+    }
+
+    function handleShowNewQuestForm() { playSound(UI.sounds.click); UI.newQuest.display.classList.add('hidden'); UI.newQuest.form.classList.remove('hidden'); UI.newQuest.titleInput.focus(); }
+    function handleHideNewQuestForm(playSoundOnClick = true) { if(playSoundOnClick) playSound(UI.sounds.click); UI.newQuest.form.classList.add('hidden'); UI.newQuest.display.classList.remove('hidden'); clearNewQuestForm(); }
+    async function handleAcceptQuest(e) {
+        e.preventDefault();
+        playSound(UI.sounds.questStart);
+        const title = UI.newQuest.titleInput.value.trim();
+        const author = UI.newQuest.authorInput.value.trim();
+        let genre = (UI.newQuest.genreSelect.value === 'custom') ? UI.newQuest.customGenreInput.value.trim() : UI.newQuest.genreSelect.value;
+        const totalPages = parseInt(UI.newQuest.totalPagesInput.value);
+        if (!title || !genre || isNaN(totalPages) || totalPages <= 0) { playSound(UI.sounds.error); updateBarbarian('angry', randomChoice(BARB_ISMS["Grizzled Veteran"].error)); return; }
+        userData.activeQuest = { id: `quest_${Date.now()}`, title, author, genre, totalPages, currentPage: 0, status: enums.questStatus.ACTIVE, dateStarted: new Date().toLocaleDateString('en-GB') };
+        clearNewQuestForm(); updateBarbarian('pleased', randomChoice(BARB_ISMS["Grizzled Veteran"].saving_data));
+        await saveUserDataToFirestore(); updateBarbarian('celebrate', randomChoice(BARB_ISMS["Grizzled Veteran"].quest_accepted)); renderUI();
+    }
+    async function handleLogPages() {
+        playSound(UI.sounds.pageTurn);
+        const pages = parseInt(UI.activeQuest.pagesReadInput.value);
+        const quest = userData.activeQuest;
+        const remainingPages = quest.totalPages - quest.currentPage;
+        if (isNaN(pages) || pages <= 0) { playSound(UI.sounds.error); updateBarbarian('angry', randomChoice(BARB_ISMS["Grizzled Veteran"].error)); return; }
+        if (pages > remainingPages) { playSound(UI.sounds.error); updateBarbarian('angry', `${BARB_ISMS["Grizzled Veteran"].error_page_count[0]} YOU ONLY HAVE ${remainingPages} PAGES LEFT!`); return; }
+        quest.currentPage += pages; userData.pagesReadToday = (userData.pagesReadToday || 0) + pages;
+        applyXpGains(calculateXpGains({ type: 'logPages', pages }));
+        if(userData.bounties?.weekly_pages) { userData.bounties.weekly_pages.progress = (userData.bounties.weekly_pages.progress || 0) + pages; }
+        UI.activeQuest.pagesReadInput.value = '';
+        checkForFeats(); checkForBountyCompletion(); checkAttributesForLevelUp();
+        updateBarbarian('pleased', randomChoice(BARB_ISMS["Grizzled Veteran"].saving_data));
+        await saveUserDataToFirestore();
+        updateBarbarian('pleased', userData.unlockedPerks.includes('cha_perk_1a') ? randomChoice(BARB_ISMS["Grizzled Veteran"].charmed_encouragement) : randomChoice(BARB_ISMS["Grizzled Veteran"].general_encouragement));
+        renderUI();
+    }
+    async function handleConquerQuest() {
+        playSound(UI.sounds.questComplete);
+        const quest = userData.activeQuest; if (!quest) return;
+        applyXpGains(calculateXpGains({ type: 'conquer', quest }));
+        const genreLower = quest.genre.toLowerCase();
+        if (!userData.conqueredGenres.includes(genreLower)) { userData.conqueredGenres.push(genreLower); }
+        if (userData.bounties?.monthly_conqueror) { userData.bounties.monthly_conqueror.progress = (userData.bounties.monthly_conqueror.progress || 0) + 1; }
+        userData.completedQuests.push({ ...quest, status: enums.questStatus.CONQUERED, dateConquered: new Date().toLocaleDateString('en-GB') });
+        userData.activeQuest = null;
+        checkForFeats(quest); checkForBountyCompletion(); checkAttributesForLevelUp();
+        updateBarbarian('celebrate', randomChoice(BARB_ISMS["Grizzled Veteran"].saving_data));
+        await saveUserDataToFirestore();
+        updateBarbarian('celebrate', randomChoice(BARB_ISMS["Grizzled Veteran"].book_completed));
+        renderUI();
+    }
+    async function handleSurrenderQuest() {
+        playSound(UI.sounds.error);
+        if (confirm("Are you sure you wish to flee from this quest, coward?")) {
+            userData.archivedQuests.push({ ...userData.activeQuest, status: enums.questStatus.ABANDONED, dateAbandoned: new Date().toLocaleDateString('en-GB') });
+            userData.activeQuest = null; updateBarbarian('angry', randomChoice(BARB_ISMS["Grizzled Veteran"].saving_data));
+            await saveUserDataToFirestore(); updateBarbarian('angry', randomChoice(BARB_ISMS["Grizzled Veteran"].quest_surrendered)); renderUI();
+        }
+    }
+    async function handleUndoConquest(questId) {
+        playSound(UI.sounds.click);
+        if (userData.activeQuest) { playSound(UI.sounds.error); updateBarbarian('angry', randomChoice(BARB_ISMS["Grizzled Veteran"].error_undo)); return; }
+        const questToUndo = userData.completedQuests.find(q => q.id === questId);
+        if (questToUndo) {
+            delete questToUndo.dateConquered; questToUndo.status = enums.questStatus.ACTIVE;
+            userData.activeQuest = questToUndo; userData.completedQuests = userData.completedQuests.filter(q => q.id !== questId);
+            updateBarbarian('pleased', randomChoice(BARB_ISMS["Grizzled Veteran"].saving_data));
+            await saveUserDataToFirestore(); updateBarbarian('pleased', randomChoice(BARB_ISMS["Grizzled Veteran"].quest_undone)); renderUI();
+        }
+    }
+    function openEditModal() {
+        playSound(UI.sounds.click); if (!userData.activeQuest) return;
+        const quest = userData.activeQuest;
+        UI.editQuest.titleInput.value = quest.title; UI.editQuest.authorInput.value = quest.author; UI.editQuest.totalPagesInput.value = quest.totalPages;
+        const genreOptions = Array.from(UI.editQuest.genreSelect.options).map(opt => opt.value);
+        if (genreOptions.includes(quest.genre)) { UI.editQuest.genreSelect.value = quest.genre; UI.editQuest.customGenreInput.classList.add('hidden'); } else { UI.editQuest.genreSelect.value = 'custom'; UI.editQuest.customGenreInput.value = quest.genre; UI.editQuest.customGenreInput.classList.remove('hidden'); }
+        UI.editQuest.modal.classList.remove('hidden');
+    }
+    function closeEditModal() { playSound(UI.sounds.click); UI.editQuest.modal.classList.add('hidden'); }
+    async function handleSaveChanges() {
+        playSound(UI.sounds.click); if (!userData.activeQuest) return;
+        const quest = userData.activeQuest;
+        quest.title = UI.editQuest.titleInput.value.trim(); quest.author = UI.editQuest.authorInput.value.trim();
+        quest.genre = (UI.editQuest.genreSelect.value === 'custom') ? UI.editQuest.customGenreInput.value.trim() : UI.editQuest.genreSelect.value;
+        quest.totalPages = parseInt(UI.editQuest.totalPagesInput.value);
+        if (!quest.title || !quest.genre || isNaN(quest.totalPages) || quest.totalPages <= 0) { playSound(UI.sounds.error); alert("Fool! Title, Genre, and a valid Page Count are required."); return; }
+        await saveUserDataToFirestore(); renderUI(); closeEditModal();
+    }
+    function clearNewQuestForm() { UI.newQuest.form.reset(); UI.newQuest.customGenreInput.classList.add('hidden'); }
+
+    async function handleCreateClan() {
+        playSound(UI.sounds.questStart);
+        const clanName = UI.clans.nameInput.value.trim();
+        if (clanName.length < 3 || clanName.length > 25) { playSound(UI.sounds.error); updateBarbarian('angry', "A clan name must be between 3 and 25 characters!"); return; }
+        if (userData.clanId) { playSound(UI.sounds.error); updateBarbarian('angry', "You are already in a clan!"); return; }
+        updateBarbarian('pleased', 'Forging your new War-Band...');
+        try {
+            const batch = db.batch(); const clanRef = db.collection('clans').doc(); const userRef = db.collection('users').doc(currentUser.uid);
+            const clanData = { name: clanName, leaderId: currentUser.uid, memberIds: [currentUser.uid], createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+            batch.set(clanRef, clanData); batch.update(userRef, { clanId: clanRef.id, clanName: clanName });
+            await batch.commit();
+            userData.clanId = clanRef.id; userData.clanName = clanName;
+            updateBarbarian('celebrate', `The "${clanName}" war-band has been founded!`); renderClansPage();
+        } catch (error) { console.error("Error creating clan: ", error); updateBarbarian('angry', "The founding ritual failed! Try again."); }
+    }
+    async function handleJoinClan(event) {
+        if (!event.target.classList.contains('join-btn')) return;
+        playSound(UI.sounds.questStart); const { clanId, clanName } = event.target.dataset;
+        if (userData.clanId) { updateBarbarian('angry', "You are already in a clan!"); return; }
+        updateBarbarian('pleased', `Joining the ${clanName} war-band...`);
+        try {
+            const batch = db.batch(); const userRef = db.collection('users').doc(currentUser.uid); const clanRef = db.collection('clans').doc(clanId);
+            batch.update(userRef, { clanId: clanId, clanName: clanName }); batch.update(clanRef, { memberIds: firebase.firestore.FieldValue.arrayUnion(currentUser.uid) });
+            await batch.commit();
+            userData.clanId = clanId; userData.clanName = clanName;
+            updateBarbarian('celebrate', `You have joined the ranks of ${clanName}!`); renderClansPage();
+        } catch (error) { console.error("Error joining clan:", error); updateBarbarian('angry', "The joining ritual failed! Try again."); }
+    }
+    async function handleLeaveClan(withConfirmation = true) {
+        playSound(UI.sounds.error); if (!userData.clanId) return;
+        const clanDoc = await db.collection('clans').doc(userData.clanId).get();
+        if(clanDoc.exists && clanDoc.data().leaderId === currentUser.uid && clanDoc.data().memberIds.length > 1) { alert("The clan leader must pass leadership before abandoning their war-band!"); return; }
+        if (!withConfirmation || confirm(`Are you sure you wish to abandon the ${userData.clanName} war-band?`)) {
+            updateBarbarian('angry', 'Leaving the clan...');
+            try {
+                const batch = db.batch(); const userRef = db.collection('users').doc(currentUser.uid); const clanRef = db.collection('clans').doc(userData.clanId);
+                batch.update(userRef, { clanId: null, clanName: null }); batch.update(clanRef, { memberIds: firebase.firestore.FieldValue.arrayRemove(currentUser.uid) });
+                await batch.commit();
+                const oldClanName = userData.clanName; userData.clanId = null; userData.clanName = null;
+                updateBarbarian('pleased', `You have left the ${oldClanName} war-band.`); renderClansPage();
+            } catch (error) { console.error("Error leaving clan:", error); updateBarbarian('angry', "Could not leave the clan."); }
+        }
+    }
+
+    function showAuthError(message) { UI.auth.errorMessage.textContent = message; UI.auth.errorMessage.classList.add('visible'); }
+    function clearAuthError() { UI.auth.errorMessage.textContent = ''; UI.auth.errorMessage.classList.remove('visible'); }
+    function getAuthErrorMessage(errorCode) { return (BARB_ISMS["Grizzled Veteran"].auth_errors[errorCode]) || BARB_ISMS["Grizzled Veteran"].auth_errors["default"]; }
+
+    function handleAuthButtonClick() { playSound(UI.sounds.click); if (currentUser) { auth.signOut(); } else { UI.auth.form.classList.remove('hidden'); clearAuthError(); } }
+    async function handleLogin(e) { e.preventDefault(); playSound(UI.sounds.click); clearAuthError(); try { await auth.signInWithEmailAndPassword(UI.auth.emailInput.value, UI.auth.passwordInput.value); } catch (error) { playSound(UI.sounds.error); updateBarbarian('angry'); showAuthError(getAuthErrorMessage(error.code)); } }
+    async function handleSignup(e) { e.preventDefault(); playSound(UI.sounds.click); clearAuthError(); try { const userCredential = await auth.createUserWithEmailAndPassword(UI.auth.emailInput.value, UI.auth.passwordInput.value); if (UI.auth.usernameInput.value.trim()) { await userCredential.user.updateProfile({ displayName: UI.auth.usernameInput.value.trim() }); } } catch (error) { playSound(UI.sounds.error); updateBarbarian('angry'); showAuthError(getAuthErrorMessage(error.code)); } }
+
+    async function saveUserDataToFirestore() { if (currentUser) { try { await db.collection('users').doc(currentUser.uid).set(userData); } catch (error) { console.error("Error saving user data:", error); updateBarbarian('angry', "Could not save your progress!"); } } }
+    async function loadUserDataFromFirestore() {
+        const userRef = db.collection('users').doc(currentUser.uid); const doc = await userRef.get();
+        if (doc.exists) {
+            userData = { ...defaultUserData, ...doc.data() };
+            let needsSave = false;
+            if (!userData.attributes || !userData.attributes.strength.hasOwnProperty('level')) { userData.attributes = { ...defaultUserData.attributes }; needsSave = true; }
+            ['unlockedPerks', 'conqueredGenres', 'archivedQuests'].forEach(prop => { if (!Array.isArray(userData[prop])) { userData[prop] = []; needsSave = true; } });
+            if (typeof userData.perkPoints !== 'number') { userData.perkPoints = 0; needsSave = true; }
+            if (typeof userData.bounties !== 'object' || userData.bounties === null) { userData.bounties = {}; needsSave = true; }
+            if (needsSave) await saveUserDataToFirestore();
+            const today = new Date().toDateString();
+            if(userData.lastLoginDate !== today) { userData.pagesReadToday = 0; userData.lastLoginDate = today; await saveUserDataToFirestore(); }
+        } else { userData = { ...defaultUserData, displayName: currentUser.displayName }; await saveUserDataToFirestore(); }
+    }
+    
+    function initializeEventListeners() {
+        Object.values(VIEWS).forEach(view => view.nav.addEventListener('click', () => switchView(view.element.id.replace('Page','').replace('View','').replace('main','log'))));
+        UI.attributes.perksSection.addEventListener('click', handleUnlockPerk);
+        UI.journey.filters.addEventListener('click', (event) => { if (event.target.classList.contains('filter-btn')) { playSound(UI.sounds.click); UI.journey.filters.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active')); event.target.classList.add('active'); currentJourneyFilter = event.target.dataset.filter; renderJourneyPage(); } });
+        UI.bounties.grid.addEventListener('click', handleAcceptBounty);
+        UI.completed.list.addEventListener('click', (event) => { if (event.target.classList.contains('undo-btn')) { handleUndoConquest(event.target.dataset.id); } });
+        UI.clans.list.addEventListener('click', handleJoinClan);
+        UI.newQuest.startBtn.addEventListener('click', handleShowNewQuestForm);
+        UI.newQuest.form.addEventListener('submit', handleAcceptQuest);
+        UI.newQuest.cancelBtn.addEventListener('click', () => handleHideNewQuestForm(true));
+        UI.activeQuest.logPagesBtn.addEventListener('click', handleLogPages);
+        UI.activeQuest.conquerBtn.addEventListener('click', handleConquerQuest);
+        UI.activeQuest.surrenderBtn.addEventListener('click', handleSurrenderQuest);
+        UI.clans.createBtn.addEventListener('click', handleCreateClan);
+        UI.clans.leaveBtn.addEventListener('click', () => handleLeaveClan(true));
+        UI.editQuest.btn.addEventListener('click', openEditModal);
+        UI.editQuest.saveBtn.addEventListener('click', handleSaveChanges);
+        UI.editQuest.cancelBtn.addEventListener('click', closeEditModal);
+        UI.auth.btn.addEventListener('click', handleAuthButtonClick);
+        UI.auth.form.addEventListener('submit', (e) => {
+            const activeElement = document.activeElement;
+            if (activeElement.id === 'loginBtn') handleLogin(e);
+            else if (activeElement.id === 'signupBtn') handleSignup(e);
+        });
+        UI.auth.cancelBtn.addEventListener('click', () => { playSound(UI.sounds.click); UI.auth.form.classList.add('hidden'); clearAuthError(); });
+        const setupGenreToggle = (select, customInput) => { select.addEventListener('change', () => { customInput.classList.toggle('hidden', select.value !== 'custom'); }); };
+        setupGenreToggle(UI.newQuest.genreSelect, UI.newQuest.customGenreInput);
+        setupGenreToggle(UI.editQuest.genreSelect, UI.editQuest.customGenreInput);
+    }
+    
+    async function handleUserLoggedIn(user) {
+        currentUser = user; UI.auth.form.classList.add('hidden');
+        UI.auth.userName.textContent = user.displayName || user.email.split('@')[0];
+        UI.auth.btn.textContent = "Log Out";
+        await loadUserDataFromFirestore();
+        updateBarbarian('idle', randomChoice(BARB_ISMS["Grizzled Veteran"].welcome)); renderUI();
+    }
+    function handleUserLoggedOut() {
+        currentUser = null; UI.auth.form.classList.add('hidden');
+        userData = { ...defaultUserData };
+        UI.auth.userName.textContent = "Guest Warrior"; UI.auth.btn.textContent = "Sign Up / Log In";
+        updateBarbarian('idle', "Hmph. A stranger. Sign up if you want your deeds remembered.");
+        switchView(enums.views.LOG); renderUI();
+    }
+    
     initializeEventListeners();
+    auth.onAuthStateChanged((user) => { user ? handleUserLoggedIn(user) : handleUserLoggedOut(); });
 });
