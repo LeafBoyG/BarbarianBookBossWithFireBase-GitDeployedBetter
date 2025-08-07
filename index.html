@@ -217,32 +217,80 @@
                 <div id="bountiesGrid" class="bounties-grid"></div>
             </section>
             
-            <section id="clansPage" class="hidden">
-                <div id="noClanView">
-                    <div class="page-header">
-                        <h2>Join the War-Bands</h2>
-                        <p>Forge your own clan or seek out others to join.</p>
-                    </div>
-                    <div class="create-clan-form">
-                        <h3>Found a New Clan</h3>
-                        <div class="input-group">
-                            <label for="clanNameInput">Clan Name</label>
-                            <input type="text" id="clanNameInput" placeholder="e.g., The Tome Slayers" maxlength="25">
-                            <button id="createClanBtn">Forge War-Band</button>
+          <section id="clansPage" class="hidden">
+    <div id="noClanView">
+        <div class="page-header">
+            <h2>Join the War-Bands</h2>
+            <p>Forge your own clan or seek out others to join.</p>
+        </div>
+        <div class="create-clan-form">
+            <h3>Found a New Clan</h3>
+            <div class="input-group">
+                <label for="clanNameInput">Clan Name</label>
+                <input type="text" id="clanNameInput" placeholder="e.g., The Tome Slayers" maxlength="25">
+                <button id="createClanBtn">Forge War-Band</button>
+            </div>
+        </div>
+        <div class="join-clan-section">
+            <h3>Or Join an Existing War-Band</h3>
+            <ul id="clanList" class="clan-list"></ul>
+        </div>
+    </div>
+
+    <div id="clanMemberView" class="hidden">
+        <div class="clan-header">
+            <div class="clan-banner">
+                <h2 id="clanNameBanner"></h2>
+                <p id="clanMottoBanner"></p>
+            </div>
+            <button id="clanAdminBtn" class="edit-btn hidden">Admin Tools</button>
+        </div>
+
+        <div class="clan-dashboard">
+            <div class="clan-dashboard-column">
+                <section class="ui-panel">
+                    <h3 class="section-header">Clan Statistics</h3>
+                    <div id="clanStatsPanel" class="clan-stats-panel">
                         </div>
-                    </div>
-                    <div class="join-clan-section">
-                        <h3>Or Join an Existing War-Band</h3>
-                        <ul id="clanList" class="clan-list"></ul>
-                    </div>
-                </div>
-                <div id="clanMemberView" class="hidden">
-                    <div id="clanHallHeader" class="page-header"></div>
-                    <div class="section-header">Members</div>
-                    <ul id="clanMemberList" class="clan-member-list"></ul>
-                    <button id="leaveClanBtn" class="leave-clan-btn">Leave War-Band</button>
-                </div>
-            </section>
+                </section>
+                <section class="ui-panel">
+                    <h3 class="section-header">Clan Bounty</h3>
+                    <div id="clanBountyPanel">
+                        </div>
+                </section>
+            </div>
+            <div class="clan-dashboard-column">
+                <section class="ui-panel">
+                    <h3 class="section-header">Member Roster</h3>
+                    <ul id="clanRoster" class="clan-roster">
+                        </ul>
+                </section>
+                <section class="ui-panel">
+                    <h3 class="section-header">Leaderboards</h3>
+                    <div id="clanLeaderboard">
+                         </div>
+                </section>
+            </div>
+        </div>
+        <button id="leaveClanBtn" class="leave-clan-btn surrender-button">Leave War-Band</button>
+    </div>
+</section>
+
+<div id="clanAdminModal" class="auth-form-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="clan-admin-heading">
+    <div class="auth-form-content">
+         <h3 id="clan-admin-heading">Clan Administration</h3>
+         <div class="input-group">
+            <label for="editClanNameInput">Clan Name</label>
+            <input type="text" id="editClanNameInput" maxlength="25">
+            <label for="editClanMottoInput">Clan Motto</label>
+            <input type="text" id="editClanMottoInput" maxlength="100">
+            <div class="form-actions">
+                <button id="saveClanChangesBtn">Save Changes</button>
+                <button id="cancelClanChangesBtn" class="cancel-button" type="button">Cancel</button>
+            </div>
+         </div>
+    </div>
+</div>
         </main>
 
         <footer>
@@ -256,8 +304,8 @@
                 <h3 id="auth-heading">TRAIN HARDER, WARRIOR!</h3>
                 <label for="authEmail" class="sr-only">Email</label>
                 <input type="email" id="authEmail" placeholder="EMAIL" required autocomplete="email">
-                <label for="authUsername" class="sr-only">Username (Optional)</label>
-                <input type="text" id="authUsername" placeholder="USERNAME (OPTIONAL)" autocomplete="username">
+                <label for="authUsername" class="sr-only">Username</label>
+                <input type="text" id="authUsername" placeholder="USERNAME" required autocomplete="username">
                 <label for="authPassword" class="sr-only">Password</label>
                 <input type="password" id="authPassword" placeholder="PASSWORD" required autocomplete="current-password">
                 <div id="authErrorMessage" class="auth-error-message"></div>
