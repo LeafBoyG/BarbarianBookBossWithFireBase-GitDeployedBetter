@@ -9,42 +9,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const BARB_ISMS = {
         "Grizzled Veteran": {
-            welcome: ["Hmph. Another twig-arm. Ready for words or just to be food for worms?"],
-            book_completed: ["You crushed that book! Next!"],
-            general_encouragement: ["Good. Keep at it. Don't let your mind get soft."],
-            charmed_encouragement: ["Your progress is... acceptable. Continue.", "Hmph. Not bad. For a book-worm."],
-            saving_data: ["Recording your deeds..."],
-            quest_accepted: ["A new challenge! Do not fail me, whelp."],
-            quest_surrendered: ["You flee?! Cowards have no place in my war-band!"],
-            quest_undone: ["Hah! The tome returns from the grave!"],
-            error_undo: ["Finish your current battle before starting another!"],
-            error_page_count: ["YOU CANNOT READ MORE PAGES THAN EXIST, FOOL!"],
-            error: ["Fool! Not like that!"],
-            auth_errors: {
-                "auth/invalid-email": "EMAIL BAD! NOT A REAL EMAIL, FOOL!",
-                "auth/user-not-found": "NO WARRIOR WITH THAT EMAIL! SIGN UP, MAYBE?",
-                "auth/wrong-password": "PASSWORD WRONG! TRY AGAIN, OR BRAIN SMASH!",
-                "auth/email-already-in-use": "EMAIL TAKEN! ANOTHER WARRIOR GOT IT! USE ANOTHER!",
-                "auth/weak-password": "PASSWORD WEAK! NEED 6+ CHARACTERS! BE STRONGER!",
-                "default": "AUTH FAILED!"
-            }
+            welcome: ["Hmph. Another twig-arm. Ready for words or just to be food for worms?"], book_completed: ["You crushed that book! Next!"], general_encouragement: ["Good. Keep at it. Don't let your mind get soft."], charmed_encouragement: ["Your progress is... acceptable. Continue.", "Hmph. Not bad. For a book-worm."], saving_data: ["Recording your deeds..."], quest_accepted: ["A new challenge! Do not fail me, whelp."], quest_surrendered: ["You flee?! Cowards have no place in my war-band!"], quest_undone: ["Hah! The tome returns from the grave!"], error_undo: ["Finish your current battle before starting another!"], error_page_count: ["YOU CANNOT READ MORE PAGES THAN EXIST, FOOL!"], error: ["Fool! Not like that!"], auth_errors: { "auth/invalid-email": "EMAIL BAD! NOT A REAL EMAIL, FOOL!", "auth/user-not-found": "NO WARRIOR WITH THAT EMAIL! SIGN UP, MAYBE?", "auth/wrong-password": "PASSWORD WRONG! TRY AGAIN, OR BRAIN SMASH!", "auth/email-already-in-use": "EMAIL TAKEN! ANOTHER WARRIOR GOT IT! USE ANOTHER!", "auth/weak-password": "PASSWORD WEAK! NEED 6+ CHARACTERS! BE STRONGER!", "default": "AUTH FAILED!" }
         }
     };
     const BARB_IMAGE_PATH = 'assets/Barbs/';
     const FEATS_LIST = { page_pounder: { name: "Page Pounder", description: "Read 50 pages in a single day." }, saga_smasher: { name: "Saga Smasher", description: "Conquer 3 books." }, epic_explorer: { name: "Epic Explorer", description: "Conquer a book over 500 pages long." }, librarians_bane: { name: "Librarian's Bane", description: "Conquer 10 books." }, genre_master_fantasy: { name: "Fantasy Realm Master", description: "Conquer 5 fantasy books." }, genre_master_scifi: { name: "Starship Captain", description: "Conquer 5 Science Fiction books." } };
     const PERKS_LIST = {
-        strength: [
-            { id: 'str_perk_5a', name: 'Tome Hauler', description: 'Gain a permanent 5% bonus to all Strength XP earned from reading pages.', requiredLevel: 5 }, { id: 'str_perk_5b', name: 'Finishing Blow', description: 'Gain a flat +50 bonus to Strength XP each time you conquer a book.', requiredLevel: 5 }, { id: 'str_perk_10a', name: 'Warrior\'s Stamina', description: 'The first 25 pages you read each day grant 1.5x Strength XP.', requiredLevel: 10 }, { id: 'str_perk_10b', name: 'Unstoppable Force', description: 'Gain 10 bonus Strength XP for each day of your current reading streak.', requiredLevel: 10 }, { id: 'str_perk_15a', name: 'Literary Crusher', description: 'Gain a permanent +10% to Strength XP from all sources.', requiredLevel: 15 }, { id: 'str_perk_15b', name: 'Epic Strength', description: 'Double the Strength XP gained from conquering books over 500 pages.', requiredLevel: 15 }, { id: 'str_perk_20a', name: 'Master of the Grind', description: 'The bonus from the "Tome Hauler" perk is doubled to 10%.', requiredLevel: 20 }, { id: 'str_perk_20b', name: 'Unending Power', description: 'Reading streaks no longer reset; they only pause after 3 days of inactivity.', requiredLevel: 20 }
-        ],
-        intellect: [
-            { id: 'int_perk_5a', name: 'Polymath', description: 'Gain a 10% bonus to the flat XP reward for conquering a book in a new genre.', requiredLevel: 5 }, { id: 'int_perk_5b', name: 'Quick Study', description: 'The first 10 pages you read each day grant double Strength XP.', requiredLevel: 5 }, { id: 'int_perk_10a', name: 'Librarian\'s Scorn', description: 'Gain a flat +150 Intellect XP for conquering any Non-Fiction book.', requiredLevel: 10 }, { id: 'int_perk_10b', name: 'Genre Dabbler', description: 'Gain a flat +100 Intellect XP for every 3 unique genres you conquer.', requiredLevel: 10 }, { id: 'int_perk_15a', name: 'Scholarly Pursuit', description: 'The XP bonus from the "Polymath" perk is doubled to 20%.', requiredLevel: 15 }, { id: 'int_perk_15b', name: 'Deep Thinker', description: 'Unlocking any Feat now also grants a bonus of 300 Intellect XP.', requiredLevel: 15 }, { id: 'int_perk_20a', name: 'Master Linguist', description: 'Gain a permanent +10% to Intellect XP from all sources.', requiredLevel: 20 }, { id: 'int_perk_20b', name: 'Encyclopedic Knowledge', description: 'The flat XP bonus for conquering a book in a new genre is permanently tripled.', requiredLevel: 20 }
-        ],
-        wisdom: [
-            { id: 'wis_perk_5a', name: 'Sage Advice', description: 'Gain a 10% bonus to Wisdom XP when conquering epic tomes (500+ pages).', requiredLevel: 5 }, { id: 'wis_perk_5b', name: 'Patient Scholar', description: 'Gain 25 bonus Wisdom XP on any day you read at least one page.', requiredLevel: 5 }, { id: 'wis_perk_10a', name: 'Meditative Reading', description: 'Gain a small amount of Wisdom XP for every day you maintain a reading streak.', requiredLevel: 10 }, { id: 'wis_perk_10b', name: 'Focused Mind', description: 'If you only log pages for a single book for 7 consecutive days, gain a +500 Wisdom XP bonus.', requiredLevel: 10 }, { id: 'wis_perk_15a', name: 'Ancient Knowledge', description: 'The bonus XP from the "Sage Advice" perk is doubled to 20%.', requiredLevel: 15 }, { id: 'wis_perk_15b', name: 'Marathon Runner', description: 'Conquering any book over 1000 pages instantly grants one free Perk Point.', requiredLevel: 15 }, { id: 'wis_perk_20a', name: 'Oracle', description: 'Gain a permanent +10% to Wisdom XP from all sources.', requiredLevel: 20 }, { id: 'wis_perk_20b', name: 'Timeless Wisdom', description: 'The daily Wisdom XP bonus from "Patient Scholar" is tripled.', requiredLevel: 20 }
-        ],
-        charisma: [
-            { id: 'cha_perk_1a', name: 'Silver Tongue', description: 'The Barbarian is permanently charmed and will always use his more encouraging dialogue.', requiredLevel: 5 }, { id: 'cha_perk_1b', name: 'Inspiring Tales', description: 'Gain +50 bonus Charisma XP when you conquer a book from the Fantasy or Romance genres.', requiredLevel: 5 }, { id: 'cha_perk_10a', name: 'Bardic Knowledge', description: 'Gain a small amount of Charisma XP when you unlock any Feat.', requiredLevel: 10 }, { id: 'cha_perk_10b', name: 'Gift of Gab', description: 'The Barbarian\'s dialogue when you spend a Perk Point is unique and highly congratulatory.', requiredLevel: 10 }, { id: 'cha_perk_15a', name: 'Beloved Leader', description: 'The bonus XP from the "Inspiring Tales" perk is doubled.', requiredLevel: 15 }, { id: 'cha_perk_15b', name: 'Diplomat', description: 'Gain a flat +200 Charisma XP for conquering a book from the "Non-Fiction" or "History" genres.', requiredLevel: 15 }, { id: 'cha_perk_20a', name: 'Legendary Presence', description: 'Gain a permanent +10% to Charisma XP from all sources.', requiredLevel: 20 }, { id: 'cha_perk_20b', name: 'Ultimate Charm', description: 'The "Silver Tongue" perk now gives a 5% chance for the Barbarian to grant you a bonus Perk Point when any attribute levels up.', requiredLevel: 20 }
-        ]
+        strength: [ { id: 'str_perk_5a', name: 'Tome Hauler', description: 'Gain a permanent 5% bonus to all Strength XP earned from reading pages.', requiredLevel: 5 }, { id: 'str_perk_5b', name: 'Finishing Blow', description: 'Gain a flat +50 bonus to Strength XP each time you conquer a book.', requiredLevel: 5 }, { id: 'str_perk_10a', name: 'Warrior\'s Stamina', description: 'The first 25 pages you read each day grant 1.5x Strength XP.', requiredLevel: 10 }, { id: 'str_perk_10b', name: 'Unstoppable Force', description: 'Gain 10 bonus Strength XP for each day of your current reading streak.', requiredLevel: 10 }, { id: 'str_perk_15a', name: 'Literary Crusher', description: 'Gain a permanent +10% to Strength XP from all sources.', requiredLevel: 15 }, { id: 'str_perk_15b', name: 'Epic Strength', description: 'Double the Strength XP gained from conquering books over 500 pages.', requiredLevel: 15 }, { id: 'str_perk_20a', name: 'Master of the Grind', description: 'The bonus from the "Tome Hauler" perk is doubled to 10%.', requiredLevel: 20 }, { id: 'str_perk_20b', name: 'Unending Power', description: 'Reading streaks no longer reset; they only pause after 3 days of inactivity.', requiredLevel: 20 } ],
+        intellect: [ { id: 'int_perk_5a', name: 'Polymath', description: 'Gain a 10% bonus to the flat XP reward for conquering a book in a new genre.', requiredLevel: 5 }, { id: 'int_perk_5b', name: 'Quick Study', description: 'The first 10 pages you read each day grant double Strength XP.', requiredLevel: 5 }, { id: 'int_perk_10a', name: 'Librarian\'s Scorn', description: 'Gain a flat +150 Intellect XP for conquering any Non-Fiction book.', requiredLevel: 10 }, { id: 'int_perk_10b', name: 'Genre Dabbler', description: 'Gain a flat +100 Intellect XP for every 3 unique genres you conquer.', requiredLevel: 10 }, { id: 'int_perk_15a', name: 'Scholarly Pursuit', description: 'The XP bonus from the "Polymath" perk is doubled to 20%.', requiredLevel: 15 }, { id: 'int_perk_15b', name: 'Deep Thinker', description: 'Unlocking any Feat now also grants a bonus of 300 Intellect XP.', requiredLevel: 15 }, { id: 'int_perk_20a', name: 'Master Linguist', description: 'Gain a permanent +10% to Intellect XP from all sources.', requiredLevel: 20 }, { id: 'int_perk_20b', name: 'Encyclopedic Knowledge', description: 'The flat XP bonus for conquering a book in a new genre is permanently tripled.', requiredLevel: 20 } ],
+        wisdom: [ { id: 'wis_perk_5a', name: 'Sage Advice', description: 'Gain a 10% bonus to Wisdom XP when conquering epic tomes (500+ pages).', requiredLevel: 5 }, { id: 'wis_perk_5b', name: 'Patient Scholar', description: 'Gain 25 bonus Wisdom XP on any day you read at least one page.', requiredLevel: 5 }, { id: 'wis_perk_10a', name: 'Meditative Reading', description: 'Gain a small amount of Wisdom XP for every day you maintain a reading streak.', requiredLevel: 10 }, { id: 'wis_perk_10b', name: 'Focused Mind', description: 'If you only log pages for a single book for 7 consecutive days, gain a +500 Wisdom XP bonus.', requiredLevel: 10 }, { id: 'wis_perk_15a', name: 'Ancient Knowledge', description: 'The bonus XP from the "Sage Advice" perk is doubled to 20%.', requiredLevel: 15 }, { id: 'wis_perk_15b', name: 'Marathon Runner', description: 'Conquering any book over 1000 pages instantly grants one free Perk Point.', requiredLevel: 15 }, { id: 'wis_perk_20a', name: 'Oracle', description: 'Gain a permanent +10% to Wisdom XP from all sources.', requiredLevel: 20 }, { id: 'wis_perk_20b', name: 'Timeless Wisdom', description: 'The daily Wisdom XP bonus from "Patient Scholar" is tripled.', requiredLevel: 20 } ],
+        charisma: [ { id: 'cha_perk_1a', name: 'Silver Tongue', description: 'The Barbarian is permanently charmed and will always use his more encouraging dialogue.', requiredLevel: 5 }, { id: 'cha_perk_1b', name: 'Inspiring Tales', description: 'Gain +50 bonus Charisma XP when you conquer a book from the Fantasy or Romance genres.', requiredLevel: 5 }, { id: 'cha_perk_10a', name: 'Bardic Knowledge', description: 'Gain a small amount of Charisma XP when you unlock any Feat.', requiredLevel: 10 }, { id: 'cha_perk_10b', name: 'Gift of Gab', description: 'The Barbarian\'s dialogue when you spend a Perk Point is unique and highly congratulatory.', requiredLevel: 10 }, { id: 'cha_perk_15a', name: 'Beloved Leader', description: 'The bonus XP from the "Inspiring Tales" perk is doubled.', requiredLevel: 15 }, { id: 'cha_perk_15b', name: 'Diplomat', description: 'Gain a flat +200 Charisma XP for conquering a book from the "Non-Fiction" or "History" genres.', requiredLevel: 15 }, { id: 'cha_perk_20a', name: 'Legendary Presence', description: 'Gain a permanent +10% to Charisma XP from all sources.', requiredLevel: 20 }, { id: 'cha_perk_20b', name: 'Ultimate Charm', description: 'The "Silver Tongue" perk now gives a 5% chance for the Barbarian to grant you a bonus Perk Point when any attribute levels up.', requiredLevel: 20 } ]
     };
     const BOUNTY_LIST = { weekly_pages: { id: 'weekly_pages', title: 'Weekly Page-Slayer', description: 'Read 500 pages within 7 days.', target: 500, reward: 750, type: 'pages' }, monthly_conqueror: { id: 'monthly_conqueror', title: 'Monthly Conqueror', description: 'Conquer 4 books in a single month.', target: 4, reward: 1500, type: 'books' } };
     const CLAN_BOUNTIES_LIST = {
@@ -640,12 +614,37 @@ document.addEventListener('DOMContentLoaded', () => {
     function clearAuthError() { UI.auth.errorMessage.textContent = ''; UI.auth.errorMessage.classList.remove('visible'); }
     function getAuthErrorMessage(errorCode) { return (BARB_ISMS["Grizzled Veteran"].auth_errors[errorCode]) || BARB_ISMS["Grizzled Veteran"].auth_errors["default"]; }
     function handleAuthButtonClick() { playSound(UI.sounds.click); if (currentUser) { auth.signOut(); } else { UI.auth.form.classList.remove('hidden'); clearAuthError(); } }
-    async function handleLogin(e) { e.preventDefault(); playSound(UI.sounds.click); clearAuthError(); try { await auth.signInWithEmailAndPassword(UI.auth.emailInput.value, UI.auth.passwordInput.value); } catch (error) { playSound(UI.sounds.error); updateBarbarian('angry'); showAuthError(getAuthErrorMessage(error.code)); } }
-    async function handleSignup(e) {
-        e.preventDefault(); playSound(UI.sounds.click); clearAuthError();
+    async function handleLogin(event) {
+        event.preventDefault();
+        playSound(UI.sounds.click);
+        clearAuthError();
+        try {
+            await auth.signInWithEmailAndPassword(UI.auth.emailInput.value, UI.auth.passwordInput.value);
+        } catch (error) {
+            playSound(UI.sounds.error);
+            updateBarbarian('angry');
+            showAuthError(getAuthErrorMessage(error.code));
+        }
+    }
+    async function handleSignup(event) {
+        event.preventDefault();
+        playSound(UI.sounds.click);
+        clearAuthError();
         const username = UI.auth.usernameInput.value.trim();
-        if (!username) { playSound(UI.sounds.error); updateBarbarian('angry'); showAuthError("USERNAME IS REQUIRED, WHELP!"); return; }
-        try { const userCredential = await auth.createUserWithEmailAndPassword(UI.auth.emailInput.value, UI.auth.passwordInput.value); await userCredential.user.updateProfile({ displayName: username }); } catch (error) { playSound(UI.sounds.error); updateBarbarian('angry'); showAuthError(getAuthErrorMessage(error.code)); }
+        if (!username) {
+            playSound(UI.sounds.error);
+            updateBarbarian('angry');
+            showAuthError("USERNAME IS REQUIRED, WHELP!");
+            return;
+        }
+        try {
+            const userCredential = await auth.createUserWithEmailAndPassword(UI.auth.emailInput.value, UI.auth.passwordInput.value);
+            await userCredential.user.updateProfile({ displayName: username });
+        } catch (error) {
+            playSound(UI.sounds.error);
+            updateBarbarian('angry');
+            showAuthError(getAuthErrorMessage(error.code));
+        }
     }
     async function saveUserDataToFirestore() { if (currentUser) { try { await db.collection('users').doc(currentUser.uid).set(userData); } catch (error) { console.error("Error saving user data:", error); updateBarbarian('angry', "Could not save your progress!"); } } }
     async function loadUserDataFromFirestore() {
@@ -703,7 +702,10 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.editQuest.saveBtn.addEventListener('click', handleSaveChanges);
         UI.editQuest.cancelBtn.addEventListener('click', closeEditModal);
         UI.auth.btn.addEventListener('click', handleAuthButtonClick);
-        UI.auth.form.addEventListener('submit', (e) => { const activeElementId = document.activeElement.id; if (activeElementId === 'loginBtn') handleLogin(e); else if (activeElementId === 'signupBtn') handleSignup(e); });
+        
+        UI.auth.loginBtn.addEventListener('click', handleLogin);
+        UI.auth.signupBtn.addEventListener('click', handleSignup);
+
         UI.auth.cancelBtn.addEventListener('click', () => { playSound(UI.sounds.click); UI.auth.form.classList.add('hidden'); clearAuthError(); });
         const setupGenreToggle = (select, customInput) => { select.addEventListener('change', () => { customInput.classList.toggle('hidden', select.value !== 'custom'); }); };
         setupGenreToggle(UI.newQuest.genreSelect, UI.newQuest.customGenreInput);
