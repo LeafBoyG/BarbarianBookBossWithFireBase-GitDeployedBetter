@@ -614,6 +614,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function clearAuthError() { UI.auth.errorMessage.textContent = ''; UI.auth.errorMessage.classList.remove('visible'); }
     function getAuthErrorMessage(errorCode) { return (BARB_ISMS["Grizzled Veteran"].auth_errors[errorCode]) || BARB_ISMS["Grizzled Veteran"].auth_errors["default"]; }
     function handleAuthButtonClick() { playSound(UI.sounds.click); if (currentUser) { auth.signOut(); } else { UI.auth.form.classList.remove('hidden'); clearAuthError(); } }
+    
     async function handleLogin(event) {
         event.preventDefault();
         playSound(UI.sounds.click);
@@ -646,6 +647,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showAuthError(getAuthErrorMessage(error.code));
         }
     }
+
     async function saveUserDataToFirestore() { if (currentUser) { try { await db.collection('users').doc(currentUser.uid).set(userData); } catch (error) { console.error("Error saving user data:", error); updateBarbarian('angry', "Could not save your progress!"); } } }
     async function loadUserDataFromFirestore() {
         const userRef = db.collection('users').doc(currentUser.uid); const doc = await userRef.get();
