@@ -358,3 +358,11 @@ a, button { -webkit-tap-highlight-color: transparent; }
   .timeline-entry:nth-child(even)::after { left: -9px; }
   .clan-dashboard { flex-direction: row; }
 }
+/* --- FIX: Mobile Signup Form Position --- */
+/* On smaller screens, align the auth modal to the top to avoid the keyboard covering it. */
+@media (max-width: 768px) {
+    .auth-form-overlay {
+        align-items: flex-start;
+        padding-top: 10vh; /* Adds some space from the top of the screen */
+    }
+}

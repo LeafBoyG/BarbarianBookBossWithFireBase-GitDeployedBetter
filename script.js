@@ -300,33 +300,29 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.completed.list.innerHTML = completed.length === 0 ? '<li>The Hall is empty. Go conquer some books!</li>' : [...completed].reverse().map(quest => `<li><span>${quest.title}</span> - Conquered on ${quest.dateConquered}<button class="undo-btn" data-id="${quest.id}" aria-label="Undo Conquest" title="Undo Conquest">↶</button></li>`).join('');
     }
 
-    function applyXpGains(gains) { Object.entries(gains).forEach(([attrKey, amount]) => { if (userData.attributes[attrKey] && amount > 0) { userData.attributes[attrKey].xp += Math.ceil(amount); } }); }
-    function calculateXpGains(context) {
-        const { type, pages, quest } = context;
-        const { unlockedPerks, pagesReadToday } = userData;
-        const xp = { strength: 0, intellect: 0, wisdom: 0, charisma: 0 };
-        const hasPerk = (id) => unlockedPerks.includes(id);
-        if (type === 'logPages') {
-            xp.strength += pages;
-            if (hasPerk('int_perk_5b')) { xp.strength += Math.min(pages, Math.max(0, 10 - (pagesReadToday - pages))); }
-        } else if (type === 'conquer') {
-            xp.wisdom += Math.floor(quest.totalPages / 2);
-            if (hasPerk('str_perk_5b')) xp.strength += 50;
-            if (quest.totalPages >= 500 && hasPerk('str_perk_15b')) xp.strength += xp.wisdom;
-            const genreLower = quest.genre.toLowerCase();
-            if (!userData.conqueredGenres.includes(genreLower)) {
-                let bonus = hasPerk('int_perk_20b') ? 750 : 250;
-                if (hasPerk('int_perk_15a')) bonus *= 1.2; else if (hasPerk('int_perk_5a')) bonus *= 1.1;
-                xp.intellect += bonus;
-            }
-            if (['fantasy', 'romance'].includes(genreLower) && hasPerk('cha_perk_1b')) xp.charisma += (hasPerk('cha_perk_15a') ? 100 : 50);
-            if (['non-fiction', 'history'].includes(genreLower) && hasPerk('cha_perk_15b')) xp.charisma += 200;
+    function calculateXpForQuest(quest) {
+        const xpGains = { strength: 0, intellect: 0, wisdom: 0, charisma: 0 };
+        if (!quest) return xpGains;
+        const hasPerk = (id) => userData.unlockedPerks.includes(id);
+        xpGains.wisdom += Math.floor(quest.totalPages / 2);
+        if (hasPerk('str_perk_5b')) xpGains.strength += 50;
+        if (quest.totalPages >= 500 && hasPerk('str_perk_15b')) xpGains.strength += xpGains.wisdom;
+        const genreLower = quest.genre.toLowerCase();
+        if (!userData.conqueredGenres.includes(genreLower)) {
+            let bonus = hasPerk('int_perk_20b') ? 750 : 250;
+            if (hasPerk('int_perk_15a')) bonus *= 1.2; else if (hasPerk('int_perk_5a')) bonus *= 1.1;
+            xpGains.intellect += bonus;
         }
-        if (hasPerk('str_perk_20a')) xp.strength *= 1.10; else if (hasPerk('str_perk_5a')) xp.strength *= 1.05;
-        if (hasPerk('str_perk_15a')) xp.strength *= 1.10;
-        if (hasPerk('int_perk_20a')) xp.intellect *= 1.1; if (hasPerk('wis_perk_20a')) xp.wisdom *= 1.1; if (hasPerk('cha_perk_20a')) xp.charisma *= 1.1;
-        return xp;
+        if (['fantasy', 'romance'].includes(genreLower) && hasPerk('cha_perk_1b')) xpGains.charisma += (hasPerk('cha_perk_15a') ? 100 : 50);
+        if (['non-fiction', 'history'].includes(genreLower) && hasPerk('cha_perk_15b')) xpGains.charisma += 200;
+        if (hasPerk('str_perk_20a')) xpGains.strength *= 1.10; else if (hasPerk('str_perk_5a')) xpGains.strength *= 1.05;
+        if (hasPerk('str_perk_15a')) xpGains.strength *= 1.10;
+        if (hasPerk('int_perk_20a')) xpGains.intellect *= 1.1; if (hasPerk('wis_perk_20a')) xpGains.wisdom *= 1.1; if (hasPerk('cha_perk_20a')) xpGains.charisma *= 1.1;
+        for (const key in xpGains) { xpGains[key] = Math.ceil(xpGains[key]); }
+        return xpGains;
     }
+
+    function applyXpGains(gains) { Object.entries(gains).forEach(([attrKey, amount]) => { if (userData.attributes[attrKey] && amount > 0) { userData.attributes[attrKey].xp += Math.ceil(amount); } }); }
 
     function checkAttributesForLevelUp() {
         if (!userData || !userData.attributes) return;
@@ -471,18 +467,23 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (bountyDef.type === 'epic_books' && quest.totalPages >= 500) { progressMade = 1; }
                         if (progressMade > 0) {
                             const newProgress = (activeBounty.progress || 0) + progressMade;
-                            if (newProgress >= bountyDef.target) { setTimeout(() => completeClanBounty(userData.clanId, bountyDef), 500); }
+                            if (newProgress >= bountyDef.target) { 
+                                transaction.update(clanRef, { 'activeBounty.progress': newProgress });
+                                setTimeout(() => completeClanBounty(userData.clanId, bountyDef), 500); 
+                            }
                             else { transaction.update(clanRef, { 'activeBounty.progress': newProgress }); }
                         }
                     }
                 });
             } catch (e) { console.error("Clan bounty transaction failed: ", e); }
         }
-        applyXpGains(calculateXpGains({ type: 'conquer', quest }));
+        const xpGains = calculateXpForQuest(quest);
+        applyXpGains(xpGains);
         const genreLower = quest.genre.toLowerCase();
         if (!userData.conqueredGenres.includes(genreLower)) { userData.conqueredGenres.push(genreLower); }
         if (userData.bounties?.monthly_conqueror) { userData.bounties.monthly_conqueror.progress = (userData.bounties.monthly_conqueror.progress || 0) + 1; }
-        userData.completedQuests.push({ ...quest, status: enums.questStatus.CONQUERED, dateConquered: new Date().toLocaleDateString('en-GB') });
+        const conqueredQuest = { ...quest, status: enums.questStatus.CONQUERED, dateConquered: new Date().toLocaleDateString('en-GB'), xpAwarded: xpGains };
+        userData.completedQuests.push(conqueredQuest);
         userData.activeQuest = null;
         checkForFeats(quest); checkForBountyCompletion(); checkAttributesForLevelUp();
         updateBarbarian('celebrate', randomChoice(BARB_ISMS["Grizzled Veteran"].saving_data));
@@ -500,13 +501,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     async function handleUndoConquest(questId) {
         playSound(UI.sounds.click);
-        if (userData.activeQuest) { playSound(UI.sounds.error); updateBarbarian('angry', randomChoice(BARB_ISMS["Grizzled Veteran"].error_undo)); return; }
-        const questToUndo = userData.completedQuests.find(q => q.id === questId);
-        if (questToUndo) {
-            delete questToUndo.dateConquered; questToUndo.status = enums.questStatus.ACTIVE;
-            userData.activeQuest = questToUndo; userData.completedQuests = userData.completedQuests.filter(q => q.id !== questId);
+        if (userData.activeQuest) {
+            playSound(UI.sounds.error);
+            updateBarbarian('angry', randomChoice(BARB_ISMS["Grizzled Veteran"].error_undo));
+            return;
+        }
+        const questIndex = userData.completedQuests.findIndex(q => q.id === questId);
+        if (questIndex > -1) {
+            const questToUndo = userData.completedQuests[questIndex];
+            if (questToUndo.xpAwarded) {
+                for (const attrKey in questToUndo.xpAwarded) {
+                    userData.attributes[attrKey].xp -= questToUndo.xpAwarded[attrKey];
+                    if (userData.attributes[attrKey].xp < 0) {
+                        userData.attributes[attrKey].xp = 0;
+                    }
+                }
+            }
+            delete questToUndo.dateConquered;
+            delete questToUndo.xpAwarded;
+            questToUndo.status = enums.questStatus.ACTIVE;
+            userData.activeQuest = questToUndo;
+            userData.completedQuests.splice(questIndex, 1);
             updateBarbarian('pleased', randomChoice(BARB_ISMS["Grizzled Veteran"].saving_data));
-            await saveUserDataToFirestore(); updateBarbarian('pleased', randomChoice(BARB_ISMS["Grizzled Veteran"].quest_undone)); renderUI();
+            await saveUserDataToFirestore();
+            updateBarbarian('pleased', randomChoice(BARB_ISMS["Grizzled Veteran"].quest_undone));
+            renderUI();
         }
     }
     function openEditModal() {
