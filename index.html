@@ -42,7 +42,12 @@
         // Initialize and assign the services to the variables
         auth = firebase.auth();
         db = firebase.firestore();
-        
+        auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+  .catch((error) => {
+    console.error("Could not set auth persistence:", error.code, error.message);
+  });
+ 
+console.log("Firebase initialized successfully!");
         console.log("Firebase initialized successfully!");
     </script>
 
@@ -317,8 +322,8 @@
                 <label for="authPassword" class="sr-only">Password</label>
                 <input type="password" id="authPassword" placeholder="PASSWORD" required autocomplete="current-password">
                 <div id="authErrorMessage" class="auth-error-message"></div>
-                <button id="loginBtn" type="submit">Log In</button>
-                <button id="signupBtn" type="submit">Sign Up</button>
+                <button id="signupBtn" type="button">Log In</button>
+                <button id="signupBtn" type="button">Sign Up</button>
                 <button id="cancelAuthBtn" type="button" class="cancel-button">Cancel</button>
             </form>
         </div>
@@ -375,5 +380,7 @@
         // Dynamic footer year
         document.getElementById('footerYear').textContent = new Date().getFullYear();
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
 </body>
 </html>
