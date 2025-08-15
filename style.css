@@ -382,3 +382,42 @@ a, button { -webkit-tap-highlight-color: transparent; }
         padding-top: 10vh; /* Adds some space from the top of the screen */
     }
 }
+/* ===== Mobile Auth Form Overlay ===== */
+@media (max-width: 768px) {
+  #authForm {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-deep);
+    z-index: 9999;
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 1rem;
+  }
+
+  #authForm .input-group {
+    padding: 1rem;
+    border-radius: 6px;
+  }
+
+  #authForm input,
+  #authForm button {
+    font-size: 1rem;
+    padding: 0.9rem 1rem;
+  }
+
+  /* Make buttons full width & stacked */
+  #authForm .form-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  #authForm .form-actions button {
+    width: 100%;
+  }
+}
