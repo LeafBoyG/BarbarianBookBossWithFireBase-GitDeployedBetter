@@ -362,6 +362,7 @@ a, button { -webkit-tap-highlight-color: transparent; }
 /* On smaller screens, align the auth modal to the top to avoid the keyboard covering it. */
 @media (max-width: 768px) {
     .auth-form-overlay {
+      z-index: 5;
         align-items: flex-start;
         padding-top: 10vh; /* Adds some space from the top of the screen */
     }
