@@ -42,7 +42,8 @@
         // Initialize and assign the services to the variables
         auth = firebase.auth();
         db = firebase.firestore();
-        auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+
   .catch((error) => {
     console.error("Could not set auth persistence:", error.code, error.message);
   });
