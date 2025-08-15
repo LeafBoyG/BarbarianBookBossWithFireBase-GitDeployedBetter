@@ -648,6 +648,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     async function handleSignup(event) {
         event.preventDefault();
+         alert("Sign Up button was definitely clicked!");
         playSound(UI.sounds.click);
         clearAuthError();
         const username = UI.auth.usernameInput.value.trim();
